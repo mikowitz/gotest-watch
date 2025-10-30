@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test that initRegistry creates an empty registry map
+// Test that initRegistry creates a valid registry map
 func TestInitRegistry(t *testing.T) {
 	// Clear any existing registry
 	commandRegistry = nil
@@ -16,7 +16,6 @@ func TestInitRegistry(t *testing.T) {
 	initRegistry()
 
 	require.NotNil(t, commandRegistry, "initRegistry() did not initialize commandRegistry")
-	assert.Empty(t, commandRegistry, "expected empty registry")
 }
 
 // Test that handleCommand returns an error for unknown commands

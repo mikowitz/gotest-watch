@@ -15,6 +15,8 @@ const (
 	VerboseCmd    Command = "v"
 	SetPathCmd    Command = "p"
 	SetPatternCmd Command = "r"
+	HelpCmd       Command = "h"
+	ClearCmd      Command = "clear"
 )
 
 type Message interface {

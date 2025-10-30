@@ -8,6 +8,9 @@ var commandRegistry map[Command]CommandHandler
 
 func initRegistry() {
 	commandRegistry = make(map[Command]CommandHandler)
+	commandRegistry[VerboseCmd] = handleVerbose
+	commandRegistry[HelpCmd] = handleHelp
+	commandRegistry[ClearCmd] = handleClear
 }
 
 func handleCommand(command Command, config *TestConfig, args []string) error {

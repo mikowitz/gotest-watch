@@ -80,43 +80,43 @@
 
 ### Step 4: Simple Command Handlers
 
-- [ ] Implement handleVerbose() CommandHandler
-  - [ ] Toggle config.Verbose
-  - [ ] Print "Verbose: enabled" or "Verbose: disabled"
-  - [ ] Return nil
-- [ ] Implement handleClear() CommandHandler
-  - [ ] Reset TestPath to "./..."
-  - [ ] Reset Verbose to false
-  - [ ] Reset RunPattern to ""
-  - [ ] Print "All parameters cleared"
-  - [ ] Return nil
-- [ ] Implement handleHelp() CommandHandler
-  - [ ] Print help text with all commands
-  - [ ] Format as per spec (detailed format)
-  - [ ] Return nil
-- [ ] Update initRegistry() to register handlers:
-  - [ ] Register "v" -> handleVerbose
-  - [ ] Register "clear" -> handleClear
-  - [ ] Register "help" -> handleHelp
-- [ ] Write tests for handleVerbose:
-  - [ ] Test toggles from false to true
-  - [ ] Test toggles from true to false
-  - [ ] Capture stdout and verify acknowledgment message
-- [ ] Write tests for handleClear:
-  - [ ] Set non-default values
-  - [ ] Call handler
-  - [ ] Verify all fields reset to defaults
-  - [ ] Capture stdout and verify acknowledgment
-- [ ] Write tests for handleHelp:
-  - [ ] Capture stdout
-  - [ ] Verify help text contains all commands
-  - [ ] Verify formatting is correct
-- [ ] Update main() to demonstrate handlers
-  - [ ] Create TestConfig
-  - [ ] Call a few handlers manually
-  - [ ] Verify output
-- [ ] Run tests: `go test -v`
-- [ ] Build and run: `go build && ./gotest-watch`
+- [x] Implement handleVerbose() CommandHandler
+  - [x] Toggle config.Verbose
+  - [x] Print "Verbose: enabled" or "Verbose: disabled"
+  - [x] Return nil
+- [x] Implement handleClear() CommandHandler
+  - [x] Reset TestPath to "./..."
+  - [x] Reset Verbose to false
+  - [x] Reset RunPattern to ""
+  - [x] Print "All parameters cleared"
+  - [x] Return nil
+- [x] Implement handleHelp() CommandHandler
+  - [x] Print help text with all commands
+  - [x] Format as per spec (detailed format)
+  - [x] Return nil
+- [x] Update initRegistry() to register handlers:
+  - [x] Register "v" -> handleVerbose
+  - [x] Register "clear" -> handleClear
+  - [x] Register "h" -> handleHelp
+- [x] Write tests for handleVerbose:
+  - [x] Test toggles from false to true
+  - [x] Test toggles from true to false
+  - [x] Capture stdout and verify acknowledgment message
+- [x] Write tests for handleClear:
+  - [x] Set non-default values
+  - [x] Call handler
+  - [x] Verify all fields reset to defaults
+  - [x] Capture stdout and verify acknowledgment
+- [x] Write tests for handleHelp:
+  - [x] Capture stdout
+  - [x] Verify help text contains all commands
+  - [x] Verify formatting is correct
+- [x] Update main() to demonstrate handlers
+  - [x] Create TestConfig
+  - [x] Call a few handlers manually
+  - [x] Verify output
+- [x] Run tests: `go test -v`
+- [x] Build and run: `go build && ./gotest-watch`
 
 ### Step 5: Parameter Command Handlers
 
