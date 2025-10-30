@@ -29,31 +29,31 @@
 
 ### Step 2: Message Types
 
-- [ ] Define MessageType as string type
-- [ ] Create MessageType constants:
-  - [ ] FileChangeMsg
-  - [ ] CommandMsg
-  - [ ] HelpMsg
-  - [ ] TestCompleteMsg
-- [ ] Define Message interface with Type() method
-- [ ] Implement FileChangeMessage struct
-  - [ ] Add Type() method returning FileChangeMsg
-- [ ] Implement CommandMessage struct
-  - [ ] Add Command string field
-  - [ ] Add Args []string field
-  - [ ] Add Type() method returning CommandMsg
-- [ ] Implement HelpMessage struct
-  - [ ] Add Type() method returning HelpMsg
-- [ ] Implement TestCompleteMessage struct
-  - [ ] Add Type() method returning TestCompleteMsg
-- [ ] Write tests:
-  - [ ] Verify FileChangeMessage.Type() returns correct type
-  - [ ] Verify CommandMessage.Type() returns correct type
-  - [ ] Verify HelpMessage.Type() returns correct type
-  - [ ] Verify TestCompleteMessage.Type() returns correct type
-  - [ ] Test CommandMessage stores command and args correctly
-  - [ ] Test all types satisfy Message interface (type assertions)
-- [ ] Run tests: `go test -v`
+- [x] Define MessageType as string type
+- [x] Create MessageType constants:
+  - [x] FileChangeMsg
+  - [x] CommandMsg
+  - [x] HelpMsg
+  - [x] TestCompleteMsg
+- [x] Define Message interface with Type() method
+- [x] Implement FileChangeMessage struct
+  - [x] Add Type() method returning FileChangeMsg
+- [x] Implement CommandMessage struct
+  - [x] Add Command string field
+  - [x] Add Args []string field
+  - [x] Add Type() method returning CommandMsg
+- [x] Implement HelpMessage struct
+  - [x] Add Type() method returning HelpMsg
+- [x] Implement TestCompleteMessage struct
+  - [x] Add Type() method returning TestCompleteMsg
+- [x] Write tests:
+  - [x] Verify FileChangeMessage.Type() returns correct type
+  - [x] Verify CommandMessage.Type() returns correct type
+  - [x] Verify HelpMessage.Type() returns correct type
+  - [x] Verify TestCompleteMessage.Type() returns correct type
+  - [x] Test CommandMessage stores command and args correctly
+  - [x] Test all types satisfy Message interface (type assertions)
+- [x] Run tests: `go test -v`
 
 ### Step 3: Command Registry Foundation
 
