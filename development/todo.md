@@ -57,24 +57,24 @@
 
 ### Step 3: Command Registry Foundation
 
-- [ ] Define CommandHandler function type: `func(*TestConfig, []string) error`
-- [ ] Create global commandRegistry variable: `map[string]CommandHandler`
-- [ ] Implement initRegistry() function
-  - [ ] Initialize empty commandRegistry map
-  - [ ] Call from init() or main()
-- [ ] Implement handleCommand() function
-  - [ ] Accept command name, config pointer, args
-  - [ ] Look up handler in registry
-  - [ ] Return error if command not found
-  - [ ] Call handler with config and args
-  - [ ] Return handler result
-- [ ] Write tests:
-  - [ ] Test looking up existing command (use mock handler)
-  - [ ] Test looking up non-existent command (verify error)
-  - [ ] Test handler is called with correct arguments
-  - [ ] Test handler errors are propagated
-  - [ ] Create test mock handlers for verification
-- [ ] Run tests: `go test -v`
+- [x] Define CommandHandler function type: `func(*TestConfig, []string) error`
+- [x] Create global commandRegistry variable: `map[string]CommandHandler`
+- [x] Implement initRegistry() function
+  - [x] Initialize empty commandRegistry map
+  - [x] Call from init() or main()
+- [x] Implement handleCommand() function
+  - [x] Accept command name, config pointer, args
+  - [x] Look up handler in registry
+  - [x] Return error if command not found
+  - [x] Call handler with config and args
+  - [x] Return handler result
+- [x] Write tests:
+  - [x] Test looking up existing command (use mock handler)
+  - [x] Test looking up non-existent command (verify error)
+  - [x] Test handler is called with correct arguments
+  - [x] Test handler errors are propagated
+  - [x] Create test mock handlers for verification
+- [x] Run tests: `go test -v`
 
 ## Phase 2: Core Components
 
