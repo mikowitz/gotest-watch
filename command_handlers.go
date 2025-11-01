@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func handleVerbose(config *TestConfig, _ []string) error {
 	config.Verbose = !config.Verbose
@@ -17,6 +20,44 @@ func handleClear(config *TestConfig, _ []string) error {
 	config.Verbose = false
 	config.RunPattern = ""
 	fmt.Println("All parameters cleared")
+	return nil
+}
+
+func handleRunPattern(config *TestConfig, args []string) error {
+	if len(args) == 0 {
+		config.RunPattern = ""
+		fmt.Println("Run pattern: cleared")
+		return nil
+	}
+	pattern := args[0]
+	config.RunPattern = pattern
+	fmt.Printf("Run pattern: %s\n", pattern)
+	return nil
+}
+
+func handleTestPath(config *TestConfig, args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("path argument required")
+	}
+	path := args[0]
+	info, err := os.Stat(path)
+	if err != nil {
+		return fmt.Errorf("path does not exist: %w", err)
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("not a directory")
+	}
+	config.TestPath = path
+	fmt.Println("Test path:", path)
+	return nil
+}
+
+func handleCls(_ *TestConfig, _ []string) error {
+	fmt.Print("\x1b[H\x1b[2J")
+	return nil
+}
+
+func handleRun(config *TestConfig, args []string) error {
 	return nil
 }
 
