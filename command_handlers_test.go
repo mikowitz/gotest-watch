@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -487,8 +488,8 @@ func TestHandleTestPath_WithInvalidPath(t *testing.T) {
 func TestHandleTestPath_WithFile(t *testing.T) {
 	// Create a temporary file
 	tempDir := t.TempDir()
-	tempFile := tempDir + "/test.txt"
-	err := os.WriteFile(tempFile, []byte("test"), 0644)
+	tempFile := filepath.Join(tempDir, "test.txt")
+	err := os.WriteFile(tempFile, []byte("test"), 0o644)
 	require.NoError(t, err)
 
 	config := &TestConfig{

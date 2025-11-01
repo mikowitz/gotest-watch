@@ -45,7 +45,7 @@ func handleTestPath(config *TestConfig, args []string) error {
 		return fmt.Errorf("path does not exist: %w", err)
 	}
 	if !info.IsDir() {
-		return fmt.Errorf("not a directory")
+		return fmt.Errorf("path %q is not a directory", path)
 	}
 	config.TestPath = path
 	fmt.Println("Test path:", path)
@@ -57,7 +57,7 @@ func handleCls(_ *TestConfig, _ []string) error {
 	return nil
 }
 
-func handleRun(config *TestConfig, args []string) error {
+func handleRun(_ *TestConfig, _ []string) error {
 	return nil
 }
 
