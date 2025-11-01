@@ -120,50 +120,50 @@
 
 ### Step 5: Parameter Command Handlers
 
-- [ ] Implement handleRunPattern() CommandHandler
-  - [ ] If no args: clear RunPattern, print "Run pattern: cleared"
-  - [ ] If args provided: set RunPattern to args[0]
-  - [ ] Print "Run pattern: <pattern>"
-  - [ ] Ignore extra arguments
-  - [ ] Return nil
-- [ ] Implement handleTestPath() CommandHandler
-  - [ ] Require exactly 1 argument
-  - [ ] Return error if no argument provided
-  - [ ] Validate path exists with os.Stat()
-  - [ ] Validate path is directory with FileInfo.IsDir()
-  - [ ] If valid: set TestPath, print "Test path: <path>"
-  - [ ] If invalid: return descriptive error
-- [ ] Implement handleCls() CommandHandler
-  - [ ] Print ANSI escape sequence: "\033[H\033[2J"
-  - [ ] Return nil
-- [ ] Implement handleRun() CommandHandler (stub)
-  - [ ] Do nothing for now
-  - [ ] Return nil
-- [ ] Update initRegistry() to add:
-  - [ ] Register "r" -> handleRunPattern
-  - [ ] Register "p" -> handleTestPath
-  - [ ] Register "cls" -> handleCls
-  - [ ] Register "run" -> handleRun
-- [ ] Write tests for handleRunPattern:
-  - [ ] Test with pattern argument
-  - [ ] Test without arguments (clears pattern)
-  - [ ] Test with multiple arguments (uses first, ignores rest)
-  - [ ] Capture stdout and verify acknowledgment
-- [ ] Write tests for handleTestPath:
-  - [ ] Create temporary test directory
-  - [ ] Test with valid directory path
-  - [ ] Test with invalid/non-existent path
-  - [ ] Test with file path (not directory)
-  - [ ] Test with no arguments (error)
-  - [ ] Verify error messages
-- [ ] Write tests for handleCls:
-  - [ ] Capture stdout
-  - [ ] Verify ANSI escape sequence printed
-- [ ] Write tests for handleRun:
-  - [ ] Verify it returns nil (stub)
-- [ ] Update main() to demonstrate new handlers
-- [ ] Run tests: `go test -v`
-- [ ] Build and run: `go build && ./gotest-watch`
+- [x] Implement handleRunPattern() CommandHandler
+  - [x] If no args: clear RunPattern, print "Run pattern: cleared"
+  - [x] If args provided: set RunPattern to args[0]
+  - [x] Print "Run pattern: <pattern>"
+  - [x] Ignore extra arguments
+  - [x] Return nil
+- [x] Implement handleTestPath() CommandHandler
+  - [x] Require exactly 1 argument
+  - [x] Return error if no argument provided
+  - [x] Validate path exists with os.Stat()
+  - [x] Validate path is directory with FileInfo.IsDir()
+  - [x] If valid: set TestPath, print "Test path: <path>"
+  - [x] If invalid: return descriptive error
+- [x] Implement handleCls() CommandHandler
+  - [x] Print ANSI escape sequence: "\033[H\033[2J"
+  - [x] Return nil
+- [x] Implement handleRun() CommandHandler (stub)
+  - [x] Do nothing for now
+  - [x] Return nil
+- [x] Update initRegistry() to add:
+  - [x] Register "r" -> handleRunPattern
+  - [x] Register "p" -> handleTestPath
+  - [x] Register "cls" -> handleCls
+  - [x] Register "f" -> handleRun
+- [x] Write tests for handleRunPattern:
+  - [x] Test with pattern argument
+  - [x] Test without arguments (clears pattern)
+  - [x] Test with multiple arguments (uses first, ignores rest)
+  - [x] Capture stdout and verify acknowledgment
+- [x] Write tests for handleTestPath:
+  - [x] Create temporary test directory
+  - [x] Test with valid directory path
+  - [x] Test with invalid/non-existent path
+  - [x] Test with file path (not directory)
+  - [x] Test with no arguments (error)
+  - [x] Verify error messages
+- [x] Write tests for handleCls:
+  - [x] Capture stdout
+  - [x] Verify ANSI escape sequence printed
+- [x] Write tests for handleRun:
+  - [x] Verify it returns nil (stub)
+- [x] Update main() to demonstrate new handlers
+- [x] Run tests: `go test -v`
+- [x] Build and run: `go build && ./gotest-watch`
 
 ### Step 6: Stdin Reader
 
