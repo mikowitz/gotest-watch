@@ -11,6 +11,10 @@ func initRegistry() {
 	commandRegistry[VerboseCmd] = handleVerbose
 	commandRegistry[HelpCmd] = handleHelp
 	commandRegistry[ClearCmd] = handleClear
+	commandRegistry[SetPatternCmd] = handleRunPattern
+	commandRegistry[SetPathCmd] = handleTestPath
+	commandRegistry[ClearScreenCmd] = handleCls
+	commandRegistry[ForceRunCmd] = handleRun
 }
 
 func handleCommand(command Command, config *TestConfig, args []string) error {
