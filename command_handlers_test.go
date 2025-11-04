@@ -182,6 +182,10 @@ func TestHandleHelp_DisplaysAllCommands(t *testing.T) {
 	assert.Contains(t, output, "Set test path", "Should describe p command")
 	assert.Contains(t, output, "default: ./...", "Should mention default path")
 
+	assert.Contains(t, output, "p    ", "Should list p command without args")
+	assert.Contains(t, output, "Set test path to default", "Should describe p command without args")
+	assert.Contains(t, output, "(./...)", "Should mention default path")
+
 	assert.Contains(t, output, "clear", "Should list clear command")
 	assert.Contains(t, output, "Clear all parameters", "Should describe clear command")
 
@@ -191,7 +195,7 @@ func TestHandleHelp_DisplaysAllCommands(t *testing.T) {
 	assert.Contains(t, output, "f", "Should list force run command")
 	assert.Contains(t, output, "Force test run", "Should describe run command")
 
-	assert.Contains(t, output, "h", "Should list help command")
+	assert.Contains(t, output, "h ", "Should list help command")
 	assert.Contains(t, output, "Show this help", "Should describe help command")
 }
 
@@ -469,6 +473,40 @@ func TestHandleTestPath_WithCurrentDirectory(t *testing.T) {
 	assert.Equal(t, "Test path: .\n", output, "Should print path message")
 }
 
+// TestHandleTestPath_WithNoArgs that that handling 0 arguments resets TestPath to ./...
+func TestHandleTestPath_WithNoArgs(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./foo",
+		Verbose:    false,
+		RunPattern: "",
+	}
+
+	output := captureStdout(func() {
+		err := handleTestPath(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, "./...", config.TestPath, "TestPath should not change on error")
+	assert.Equal(t, "Test path: ./...\n", output, "Should print path message")
+}
+
+// TestHandleTestPath_WithNilArgs tests that a nil input resets TestPath
+func TestHandleTestPath_WithNilArgs(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./foo",
+		Verbose:    false,
+		RunPattern: "",
+	}
+
+	output := captureStdout(func() {
+		err := handleTestPath(config, nil)
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, "./...", config.TestPath, "TestPath should not change on error")
+	assert.Equal(t, "Test path: ./...\n", output, "Should print path message")
+}
+
 // TestHandleTestPath_WithInvalidPath tests error handling for non-existent path
 func TestHandleTestPath_WithInvalidPath(t *testing.T) {
 	config := &TestConfig{
@@ -502,36 +540,6 @@ func TestHandleTestPath_WithFile(t *testing.T) {
 
 	require.Error(t, err, "Should return error for file path")
 	assert.Contains(t, err.Error(), "not a directory", "Error should mention it's not a directory")
-	assert.Equal(t, "./...", config.TestPath, "TestPath should not change on error")
-}
-
-// TestHandleTestPath_WithNoArgs tests error handling for missing argument
-func TestHandleTestPath_WithNoArgs(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
-
-	err := handleTestPath(config, []string{})
-
-	require.Error(t, err, "Should return error when no args provided")
-	assert.Contains(t, err.Error(), "path argument required", "Error should mention required argument")
-	assert.Equal(t, "./...", config.TestPath, "TestPath should not change on error")
-}
-
-// TestHandleTestPath_WithNilArgs tests error handling for nil arguments
-func TestHandleTestPath_WithNilArgs(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
-
-	err := handleTestPath(config, nil)
-
-	require.Error(t, err, "Should return error when nil args provided")
-	assert.Contains(t, err.Error(), "path argument required", "Error should mention required argument")
 	assert.Equal(t, "./...", config.TestPath, "TestPath should not change on error")
 }
 

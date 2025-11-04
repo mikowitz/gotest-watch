@@ -20,8 +20,8 @@ func TestParseCommand(t *testing.T) {
 	}{
 		{
 			name:            "command only",
-			input:           "help",
-			expectedCommand: "help",
+			input:           "h",
+			expectedCommand: "h",
 			expectedArgs:    nil,
 		},
 		{

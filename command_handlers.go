@@ -36,16 +36,18 @@ func handleRunPattern(config *TestConfig, args []string) error {
 }
 
 func handleTestPath(config *TestConfig, args []string) error {
+	var path string
 	if len(args) == 0 {
-		return fmt.Errorf("path argument required")
-	}
-	path := args[0]
-	info, err := os.Stat(path)
-	if err != nil {
-		return fmt.Errorf("path does not exist: %w", err)
-	}
-	if !info.IsDir() {
-		return fmt.Errorf("path %q is not a directory", path)
+		path = "./..."
+	} else {
+		path = args[0]
+		info, err := os.Stat(path)
+		if err != nil {
+			return fmt.Errorf("path does not exist: %w", err)
+		}
+		if !info.IsDir() {
+			return fmt.Errorf("path %q is not a directory", path)
+		}
 	}
 	config.TestPath = path
 	fmt.Println("Test path:", path)
@@ -67,9 +69,10 @@ func handleHelp(_ *TestConfig, _ []string) error {
 	fmt.Println("  r <pattern>  Set test run pattern (-run=<pattern>)")
 	fmt.Println("  r            Clear run pattern")
 	fmt.Println("  p <path>     Set test path (default: ./...")
+	fmt.Println("  p            Set test path to default (./...)")
 	fmt.Println("  clear        Clear all parameters")
 	fmt.Println("  cls          Clear screen")
 	fmt.Println("  f            Force test run")
-	fmt.Println("  help         Show this help")
+	fmt.Println("  h            Show this help")
 	return nil
 }
