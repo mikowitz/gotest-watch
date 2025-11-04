@@ -170,7 +170,7 @@
 - [ ] Define channel types (at package level):
   - [ ] commandChan: chan CommandMessage
   - [ ] helpChan: chan HelpMessage
-  - [ ] readyChan: chan bool (unbuffered)
+  - [ ] readyChan: chan bool (buffered, capacity 1)
 - [ ] Implement parseCommand() helper function
   - [ ] Accept input string
   - [ ] Use strings.TrimSpace to clean input
