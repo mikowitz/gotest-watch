@@ -71,13 +71,13 @@ linters:
             - "!$test"
           allow:
             - $gostd
-            - github.com/mikowitz/cairo
+            - github.com/fsnotify/fsnotify
         test:
           files:
             - "$test"
           allow:
             - $gostd
-            - github.com/mikowitz/cairo
+            - github.com/fsnotify/fsnotify
             - github.com/stretchr/testify
 
 # issues:
