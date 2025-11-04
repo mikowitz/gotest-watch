@@ -52,7 +52,7 @@ func watchFiles(ctx context.Context, dir string, fileChangeChan chan FileChangeM
 	}
 
 	debounceChan := make(chan fsnotify.Event, 10)
-	go debounceLoop(200*time.Millisecond, debounceChan, func(event fsnotify.Event) {
+	go debounceLoop(200*time.Millisecond, debounceChan, func(_ fsnotify.Event) {
 		fileChangeChan <- FileChangeMessage{}
 	})
 
@@ -66,7 +66,6 @@ func watchFiles(ctx context.Context, dir string, fileChangeChan chan FileChangeM
 			}
 
 			if isTrackedChangeEvent(event) && filepath.Ext(event.Name) == ".go" {
-				//
 				// fmt.Println(event.String())
 				debounceChan <- event
 			}
