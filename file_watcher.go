@@ -53,7 +53,7 @@ func watchFiles(ctx context.Context, dir string, fileChangeChan chan FileChangeM
 
 	debounceChan := make(chan fsnotify.Event)
 	go debounceLoop(200*time.Millisecond, debounceChan, func(event fsnotify.Event) {
-		if isTrackedChangeEvent(event) && filepath.Ext(event.Name) == ".go" {
+		if isTrackedChangeEvent(event) && (filepath.Ext(event.Name) == ".go" || filepath.Ext(event.Name) == ".go~") {
 			fileChangeChan <- FileChangeMessage{}
 		}
 	})
@@ -66,7 +66,11 @@ func watchFiles(ctx context.Context, dir string, fileChangeChan chan FileChangeM
 			if !ok {
 				return
 			}
-			debounceChan <- event
+
+			if isTrackedChangeEvent(event) {
+				// fmt.Println(event.String())
+				debounceChan <- event
+			}
 		case err, ok := <-watcher.Errors:
 			if !ok {
 				return
@@ -77,7 +81,6 @@ func watchFiles(ctx context.Context, dir string, fileChangeChan chan FileChangeM
 }
 
 func debounceLoop(interval time.Duration, input chan fsnotify.Event, callback func(event fsnotify.Event)) {
-	op := fsnotify.Op(0)
 	var event fsnotify.Event
 	timer := time.NewTimer(interval)
 	<-timer.C
@@ -85,13 +88,12 @@ func debounceLoop(interval time.Duration, input chan fsnotify.Event, callback fu
 	for {
 		select {
 		case event = <-input:
+			// fmt.Println("======= resetting debounce timer")
 			timer.Reset(interval)
-			op = event.Op
 		case <-timer.C:
-			if op != fsnotify.Op(0) {
-				callback(event)
-				op = fsnotify.Op(0)
-			}
+			// fmt.Println("===== timeout reached:")
+			// fmt.Println("    ", event.String())
+			callback(event)
 		}
 	}
 }

@@ -220,7 +220,7 @@
 
 ### Step 7: File Watcher with Debounce
 
-- [ ] Add fsnotify dependency: `go get github.com/fsnotify/fsnotify`
+- [x] Add fsnotify dependency: `go get github.com/fsnotify/fsnotify`
 - [ ] Define channel type:
   - [ ] fileChangeChan: chan FileChangeMessage
 - [ ] Implement isGoFile() helper
@@ -252,27 +252,31 @@
     - [ ] Handle ctx.Done():
       - [ ] Stop timer if exists
       - [ ] Return
-- [ ] Write tests:
-  - [ ] Create temporary directory with subdirectories
-  - [ ] Create .go files in temp directory
-  - [ ] Start watcher in test
-  - [ ] Modify a .go file
-  - [ ] Verify FileChangeMessage received
-  - [ ] Test debouncing: modify multiple files rapidly
-  - [ ] Verify only one message received after 200ms
-  - [ ] Test hidden directory exclusion
-  - [ ] Create .hidden directory with .go files
-  - [ ] Verify changes in hidden dir don't trigger messages
-  - [ ] Test timer reset: multiple changes extend wait time
-  - [ ] Test context cancellation stops watcher
-- [ ] Add demo in main():
-  - [ ] Create context with 5 second timeout
-  - [ ] Create fileChangeChan
-  - [ ] Start watchFiles goroutine
-  - [ ] Wait for messages or timeout
-  - [ ] Print any received messages
-- [ ] Run tests: `go test -v`
-- [ ] Build and run: `go build && ./gotest-watch`
+- [x] Write tests (18 test functions in file_watcher_test.go):
+  - [x] Test isGoFile with .go extensions
+  - [x] Test isGoFile with non-.go extensions
+  - [x] Test isGoFile edge cases (hidden files, case sensitivity, etc.)
+  - [x] Test addWatchRecursive with simple directory
+  - [x] Test addWatchRecursive with nested directories
+  - [x] Test addWatchRecursive excludes hidden directories
+  - [x] Test addWatchRecursive error handling
+  - [x] Test watchFiles detects .go file creation
+  - [x] Test watchFiles detects .go file modification
+  - [x] Test watchFiles ignores non-.go files
+  - [x] Test watchFiles debouncing (multiple rapid changes)
+  - [x] Test watchFiles timer reset on subsequent changes
+  - [x] Test watchFiles handles nested directories
+  - [x] Test watchFiles ignores hidden directories
+  - [x] Test watchFiles context cancellation
+  - [x] Test watchFiles with mixed file types
+  - [x] Test watchFiles file removal detection
+- [x] Add integration in main():
+  - [x] Create fileChangeChan (buffered, capacity 10)
+  - [x] Start watchFiles goroutine watching current directory
+  - [x] Add case in select loop to handle FileChangeMessage
+  - [x] Print message when file changes detected
+- [x] Run tests: `go test -v` (78 tests passing, including 18 file watcher tests)
+- [x] Build and run: `go build && ./gotest-watch` (builds successfully)
 
 ### Step 8: Test Runner
 

@@ -60,6 +60,8 @@ func handleCls(_ *TestConfig, _ []string) error {
 }
 
 func handleRun(_ *TestConfig, _ []string) error {
+	fmt.Println("running tests...")
+
 	return nil
 }
 
