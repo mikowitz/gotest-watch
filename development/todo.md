@@ -167,49 +167,56 @@
 
 ### Step 6: Stdin Reader
 
-- [ ] Define channel types (at package level):
-  - [ ] commandChan: chan CommandMessage
-  - [ ] helpChan: chan HelpMessage
-  - [ ] readyChan: chan bool (unbuffered)
-- [ ] Implement parseCommand() helper function
-  - [ ] Accept input string
-  - [ ] Use strings.TrimSpace to clean input
-  - [ ] Use strings.Fields to split into parts
-  - [ ] Return command (first part) and args (rest)
-  - [ ] Handle empty input (return empty string, nil slice)
-- [ ] Implement readStdin() function
-  - [ ] Accept commandChan, helpChan, readyChan as parameters
-  - [ ] Create bufio.Scanner from os.Stdin
-  - [ ] Loop: read lines with Scanner.Scan()
-  - [ ] Use select to check readyChan before processing
-  - [ ] If readyChan receives false: block until receives true
-  - [ ] Parse each line with parseCommand()
-  - [ ] If command == "help": send HelpMessage to helpChan
-  - [ ] Otherwise: send CommandMessage to commandChan
-  - [ ] Handle empty lines (ignore)
-  - [ ] Handle Scanner errors
-- [ ] Write tests for parseCommand:
-  - [ ] Test command only (no args)
-  - [ ] Test command with single arg
-  - [ ] Test command with multiple args
-  - [ ] Test empty string
-  - [ ] Test whitespace only
-  - [ ] Test leading/trailing whitespace
-- [ ] Write tests for readStdin:
-  - [ ] Mock stdin with bytes.Buffer
-  - [ ] Test "help" command sends HelpMessage
-  - [ ] Test regular command sends CommandMessage
-  - [ ] Test command parsing (verify Command and Args fields)
-  - [ ] Test ready channel blocking (mock channel, verify behavior)
-  - [ ] Test empty lines are ignored
-- [ ] Add demo in main():
-  - [ ] Create channels
-  - [ ] Start readStdin goroutine
-  - [ ] Send ready=true
-  - [ ] Simulate a few commands with mock stdin
-  - [ ] Receive and print messages
-- [ ] Run tests: `go test -v`
-- [ ] Build and run: `go build && ./gotest-watch`
+- [x] Define channel types (at package level):
+  - [x] commandChan: chan CommandMessage
+  - [x] helpChan: chan HelpMessage
+  - [x] readyChan: chan bool (buffered, capacity 1)
+- [x] Implement parseCommand() helper function
+  - [x] Accept input string
+  - [x] Use strings.TrimSpace to clean input
+  - [x] Use strings.Fields to split into parts
+  - [x] Return command (first part) and args (rest)
+  - [x] Handle empty input (return empty string, nil slice)
+- [x] Implement readStdin() function
+  - [x] Accept commandChan, helpChan, readyChan as parameters
+  - [x] Create bufio.Scanner from io.Reader (generic, not os.Stdin specific)
+  - [x] Loop: read lines with Scanner.Scan()
+  - [x] Use select to check readyChan before processing
+  - [x] If readyChan receives false: block until receives true
+  - [x] Parse each line with parseCommand()
+  - [x] If command == "help": send HelpMessage to helpChan
+  - [x] Otherwise: send CommandMessage to commandChan
+  - [x] Handle empty lines (ignore)
+  - [x] Handle Scanner errors
+  - [x] Support context cancellation throughout
+- [x] Write tests for parseCommand:
+  - [x] Test command only (no args)
+  - [x] Test command with single arg
+  - [x] Test command with multiple args
+  - [x] Test empty string
+  - [x] Test whitespace only
+  - [x] Test leading/trailing whitespace
+  - [x] Additional edge cases (newlines, carriage returns, mixed whitespace)
+  - [x] Real-world command examples
+- [x] Write tests for readStdin:
+  - [x] Mock stdin with strings.NewReader and io.Pipe
+  - [x] Test "help" command sends HelpMessage
+  - [x] Test regular command sends CommandMessage
+  - [x] Test command parsing (verify Command and Args fields)
+  - [x] Test ready channel blocking (with proper buffered channel)
+  - [x] Test empty lines are ignored
+  - [x] Test multiple commands
+  - [x] Test context cancellation
+- [x] Add demo in main():
+  - [x] Create channels (buffered to prevent blocking)
+  - [x] Start readStdin goroutine
+  - [x] Send ready=true
+  - [x] Create TestConfig for command handlers
+  - [x] Receive and handle messages in infinite loop
+  - [x] Execute commands via handleCommand registry
+  - [x] Handle help messages via handleHelp
+- [x] Run tests: `go test -v` (61 tests passing)
+- [x] Build and run: `go build && ./gotest-watch` (interactive CLI working)
 
 ### Step 7: File Watcher with Debounce
 
