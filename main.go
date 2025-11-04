@@ -7,6 +7,8 @@ import (
 )
 
 func main() {
+	initRegistry()
+
 	fmt.Println("gotest-watch started")
 
 	ctx := context.Background()

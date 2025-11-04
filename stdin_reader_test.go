@@ -422,7 +422,7 @@ func TestReadStdin_ReadyChannelBlocksAndUnblocks(t *testing.T) {
 	readyChan <- true
 
 	// Write first command
-	pipeWriter.Write([]byte("v\n"))
+	_, _ = pipeWriter.Write([]byte("v\n"))
 
 	// Send false immediately to ensure it's in the buffer before readStdin loops back
 	readyChan <- false
@@ -461,7 +461,7 @@ func TestReadStdin_ReadyChannelBlocksAndUnblocks(t *testing.T) {
 	}
 
 	// Write third command
-	pipeWriter.Write([]byte("f\n"))
+	_, _ = pipeWriter.Write([]byte("f\n"))
 
 	// Should receive third command (still unblocked)
 	select {
@@ -536,7 +536,7 @@ func TestReadStdin_ContextCancellation(t *testing.T) {
 	readyChan <- true
 
 	// Write a command
-	pipeWriter.Write([]byte("v\n"))
+	_, _ = pipeWriter.Write([]byte("v\n"))
 
 	// Should receive it
 	select {
@@ -553,7 +553,7 @@ func TestReadStdin_ContextCancellation(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 
 	// Write another command
-	pipeWriter.Write([]byte("clear\n"))
+	_, _ = pipeWriter.Write([]byte("clear\n"))
 
 	// Should not receive it (goroutine should be stopped)
 	select {

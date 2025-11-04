@@ -25,7 +25,3 @@ func handleCommand(command Command, config *TestConfig, args []string) error {
 	}
 	return handler(config, args)
 }
-
-func init() {
-	initRegistry()
-}

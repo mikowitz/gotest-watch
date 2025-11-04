@@ -527,7 +527,7 @@ func TestHandleTestPath_WithFile(t *testing.T) {
 	// Create a temporary file
 	tempDir := t.TempDir()
 	tempFile := filepath.Join(tempDir, "test.txt")
-	err := os.WriteFile(tempFile, []byte("test"), 0o644)
+	err := os.WriteFile(tempFile, []byte("test"), 0o600)
 	require.NoError(t, err)
 
 	config := &TestConfig{

@@ -1,0 +1,110 @@
+version: "2"
+linters:
+  default: none
+  enable:
+    # - godoclint
+    # Enabled by default
+    - errcheck
+    # - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+
+    # Additional linters
+    - bodyclose
+    - depguard
+    - dupl
+    # - exportloopref
+    - funlen
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    # - gofmt
+    # - goimports
+    # - gomnd
+    - goprintffuncname
+    - gosec
+    - lll
+    - misspell
+    - nakedret
+    - noctx
+    - nolintlint
+    - rowserrcheck
+    - sqlclosecheck
+    - unconvert
+    - unparam
+    - whitespace
+
+  # Don't enable:
+  # - asciicheck: not needed for this project
+  # - gochecknoglobals: we may need some globals for C integration
+  # - gocognit: similar to gocyclo
+  # - godot: not always needed
+  # - godox: allow TODOs during development
+  # - goerr113: may be too restrictive for this project
+  # - gofumpt: gofmt is sufficient
+  # - goheader: not needed
+  # - gomodguard: not needed for this project
+  # - gomoddirectives: not needed
+  # - nestif: can be noisy
+  # - nlreturn: can be noisy
+  # - prealloc: can be noisy
+  # - testpackage: not always applicable
+  # - wsl: can be noisy
+
+  exclusions:
+    rules:
+      - path: '(.+)_test\.go'
+        linters:
+          - dupl
+          - errcheck
+          - funlen
+
+  settings:
+    depguard:
+      rules:
+        main:
+          files:
+            - "$all"
+            - "!$test"
+          allow:
+            - $gostd
+            - github.com/mikowitz/cairo
+        test:
+          files:
+            - "$test"
+          allow:
+            - $gostd
+            - github.com/mikowitz/cairo
+            - github.com/stretchr/testify
+
+# issues:
+#   exclude-use-default: false
+#   exclude-rules:
+#     # Disable gosec for test files where security is not a concern
+#     - path: _test\.go
+#       linters:
+#         - gosec
+#
+#     # CGO-related exclusions
+#     - text: "G103: Use of unsafe calls should be audited"
+#       linters:
+#         - gosec
+#
+#     # Allow long lines in generated code or comments with URLs
+#     - source: "^//go:generate "
+#       linters:
+#         - lll
+#     - source: "// http"
+#       linters:
+#         - lll
+#
+#   max-issues-per-linter: 0
+#   max-same-issues: 0
+#   new: false
+
+severity:
+  default: error
+

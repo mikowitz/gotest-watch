@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"io"
+	"log"
 	"strings"
 )
 
@@ -25,7 +26,15 @@ func parseCommand(input string) (Command, []string) {
 // IMPORTANT: readyChan MUST be buffered (capacity >= 1) to prevent deadlocks.
 // The non-blocking select means readStdin isn't always listening on readyChan.
 // If readyChan is unbuffered, senders will block indefinitely when readStdin isn't receiving.
-func readStdin(ctx context.Context, r io.Reader, cmdChan chan CommandMessage, helpChan chan HelpMessage, readyChan chan bool) {
+//
+//nolint:funlen
+func readStdin(
+	ctx context.Context,
+	r io.Reader,
+	cmdChan chan CommandMessage,
+	helpChan chan HelpMessage,
+	readyChan chan bool,
+) {
 	scanner := bufio.NewScanner(r)
 	ready := false
 
@@ -87,6 +96,6 @@ func readStdin(ctx context.Context, r io.Reader, cmdChan chan CommandMessage, he
 	}
 
 	if err := scanner.Err(); err != nil {
-		// TODO: log error
+		log.Print(err)
 	}
 }
