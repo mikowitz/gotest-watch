@@ -240,24 +240,25 @@ func TestWithOutput(t *testing.T) {
 
 // TestRunTests_HandlesCommandFailure tests that runTests completes even if command fails
 func TestRunTests_HandlesCommandFailure(t *testing.T) {
-	// Create a script that exits with error
-	tempDir := t.TempDir()
-	scriptPath := filepath.Join(tempDir, "fail_script.sh")
+	// Create a failing test
+	testContent := `package failtest
 
-	scriptContent := `#!/bin/bash
-echo "test failed"
-exit 1
+import "testing"
+
+func TestFailure(t *testing.T) {
+	t.Fatal("intentional failure")
+}
 `
-	err := os.WriteFile(scriptPath, []byte(scriptContent), 0o600)
-	require.NoError(t, err)
+	tempDir := setupTestModule(t, testContent)
 
 	ctx := context.Background()
 
-	// Use a pattern that won't match anything to cause test failure
+	// Run the test that will fail
 	config := &TestConfig{
-		TestPath:   "./...",
+		TestPath:   ".",
 		Verbose:    false,
-		RunPattern: "NonExistentTestPattern12345",
+		RunPattern: "",
+		WorkingDir: tempDir,
 	}
 
 	testCompleteChan := make(chan TestCompleteMessage, 1)
