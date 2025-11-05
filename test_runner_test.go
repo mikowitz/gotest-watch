@@ -131,7 +131,7 @@ func TestExample(t *testing.T) {
 	readyChan := make(chan bool, 1)
 
 	// Run a simple command that will succeed
-	go runTests(ctx, config, testCompleteChan, readyChan)
+	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
 	// Wait for completion message
 	select {
@@ -165,7 +165,7 @@ func TestFoo(t *testing.T) {
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 	readyChan := make(chan bool, 1)
 
-	go runTests(ctx, config, testCompleteChan, readyChan)
+	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
 	// Wait for completion
 	select {
@@ -202,15 +202,11 @@ func TestWithOutput(t *testing.T) {
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 	readyChan := make(chan bool, 1)
 
-	// Capture both stdout and stderr
-	oldStdout := os.Stdout
-	oldStderr := os.Stderr
+	// Capture both stdout and stderr using pipes
 	rOut, wOut, _ := os.Pipe()
 	rErr, wErr, _ := os.Pipe()
-	os.Stdout = wOut
-	os.Stderr = wErr
 
-	go runTests(ctx, config, testCompleteChan, readyChan)
+	go runTests(ctx, config, testCompleteChan, readyChan, wOut, wErr)
 
 	// Wait for completion
 	select {
@@ -220,11 +216,9 @@ func TestWithOutput(t *testing.T) {
 		t.Fatal("timeout waiting for test completion")
 	}
 
-	// Restore and read outputs
+	// Close writers and read outputs
 	_ = wOut.Close()
 	_ = wErr.Close()
-	os.Stdout = oldStdout
-	os.Stderr = oldStderr
 
 	var stdoutBuf, stderrBuf bytes.Buffer
 	_, _ = io.Copy(&stdoutBuf, rOut)
@@ -264,7 +258,7 @@ func TestFailure(t *testing.T) {
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 	readyChan := make(chan bool, 1)
 
-	go runTests(ctx, config, testCompleteChan, readyChan)
+	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
 	// Should still send completion message even though tests failed
 	select {
@@ -299,7 +293,7 @@ func TestWait(t *testing.T) {
 	readyChan := make(chan bool, 1)
 
 	start := time.Now()
-	go runTests(ctx, config, testCompleteChan, readyChan)
+	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
 	// Wait for completion
 	select {
@@ -336,7 +330,7 @@ func TestPattern(t *testing.T) {
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 	readyChan := make(chan bool, 1)
 
-	go runTests(ctx, config, testCompleteChan, readyChan)
+	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
 	// Wait for completion
 	select {
@@ -376,7 +370,7 @@ func TestCancel(t *testing.T) {
 	// Create a done channel to track if runTests completes
 	done := make(chan struct{})
 	go func() {
-		runTests(ctx, config, testCompleteChan, readyChan)
+		runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 		close(done)
 	}()
 
@@ -417,7 +411,7 @@ func TestCommand(t *testing.T) {
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 	readyChan := make(chan bool, 1)
 
-	go runTests(ctx, config, testCompleteChan, readyChan)
+	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
 	// Wait for completion
 	select {
@@ -508,7 +502,7 @@ func TestStdout(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	go runTests(ctx, config, testCompleteChan, readyChan)
+	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
 	select {
 	case <-testCompleteChan:
@@ -549,7 +543,7 @@ func TestRunTests_CreatesStderrPipe(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stderr = w
 
-	go runTests(ctx, config, testCompleteChan, readyChan)
+	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
 	select {
 	case <-testCompleteChan:
@@ -626,7 +620,7 @@ func TestTwo(t *testing.T) {
 			testCompleteChan := make(chan TestCompleteMessage, 1)
 			readyChan := make(chan bool, 1)
 
-			go runTests(ctx, tc.config, testCompleteChan, readyChan)
+			go runTests(ctx, tc.config, testCompleteChan, readyChan, nil, nil)
 
 			select {
 			case <-testCompleteChan:

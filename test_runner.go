@@ -32,7 +32,23 @@ func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup) {
 	}
 }
 
-func runTests(ctx context.Context, config *TestConfig, completeChan chan TestCompleteMessage, readyChan chan bool) {
+//nolint:funlen
+func runTests(
+	ctx context.Context,
+	config *TestConfig,
+	completeChan chan TestCompleteMessage,
+	readyChan chan bool,
+	stdoutWriter io.Writer,
+	stderrWriter io.Writer,
+) {
+	// Default to os.Stdout/Stderr if nil
+	if stdoutWriter == nil {
+		stdoutWriter = os.Stdout
+	}
+	if stderrWriter == nil {
+		stderrWriter = os.Stderr
+	}
+
 	testCommand := config.BuildCommand()
 	fields := strings.Fields(testCommand)
 
@@ -65,10 +81,6 @@ func runTests(ctx context.Context, config *TestConfig, completeChan chan TestCom
 
 	var wg sync.WaitGroup
 	wg.Add(2)
-
-	// Capture stdout/stderr before starting goroutines to avoid data race
-	stdoutWriter := os.Stdout
-	stderrWriter := os.Stderr
 
 	go func() {
 		r := bufio.NewScanner(stdout)

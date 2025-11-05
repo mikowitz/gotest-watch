@@ -65,7 +65,7 @@ func main() {
 			// Handle force run command specially (needs channels)
 			if cmd.Command == ForceRunCmd {
 				fmt.Println("==> Running tests...")
-				go runTests(ctx, config, testCompleteChan, readyChan)
+				go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 			} else {
 				// Execute other commands through registry
 				if err := handleCommand(cmd.Command, config, cmd.Args); err != nil {
@@ -86,7 +86,7 @@ func main() {
 		case <-fileChangeChan:
 			// File change detected - run tests automatically
 			fmt.Println("\n==> File change detected, running tests...")
-			go runTests(ctx, config, testCompleteChan, readyChan)
+			go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
 		case <-testCompleteChan:
 			// Tests completed
