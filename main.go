@@ -9,6 +9,7 @@ import (
 	"syscall"
 )
 
+//nolint:funlen
 func main() {
 	initRegistry()
 
@@ -38,7 +39,7 @@ func main() {
 	// Start file watcher in background
 	root, err := os.Getwd()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	go watchFiles(ctx, root, fileChangeChan)

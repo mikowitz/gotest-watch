@@ -6,7 +6,6 @@ import (
 	"context"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -27,12 +26,12 @@ func setupTestModule(t *testing.T, testContent string) string {
 
 go 1.24
 `
-	err := os.WriteFile(filepath.Join(tempDir, "go.mod"), []byte(goModContent), 0o644)
+	err := os.WriteFile(filepath.Join(tempDir, "go.mod"), []byte(goModContent), 0o600)
 	require.NoError(t, err)
 
 	// Write the test file
 	testFile := filepath.Join(tempDir, "example_test.go")
-	err = os.WriteFile(testFile, []byte(testContent), 0o644)
+	err = os.WriteFile(testFile, []byte(testContent), 0o600)
 	require.NoError(t, err)
 
 	return tempDir
@@ -222,16 +221,16 @@ func TestWithOutput(t *testing.T) {
 	}
 
 	// Restore and read outputs
-	wOut.Close()
-	wErr.Close()
+	_ = wOut.Close()
+	_ = wErr.Close()
 	os.Stdout = oldStdout
 	os.Stderr = oldStderr
 
 	var stdoutBuf, stderrBuf bytes.Buffer
-	io.Copy(&stdoutBuf, rOut)
-	io.Copy(&stderrBuf, rErr)
-	rOut.Close()
-	rErr.Close()
+	_, _ = io.Copy(&stdoutBuf, rOut)
+	_, _ = io.Copy(&stderrBuf, rErr)
+	_ = rOut.Close()
+	_ = rErr.Close()
 
 	// Both outputs should have content (from running actual go test)
 	// We just verify that streaming happened - content depends on actual test output
@@ -249,7 +248,7 @@ func TestRunTests_HandlesCommandFailure(t *testing.T) {
 echo "test failed"
 exit 1
 `
-	err := os.WriteFile(scriptPath, []byte(scriptContent), 0o755)
+	err := os.WriteFile(scriptPath, []byte(scriptContent), 0o600)
 	require.NoError(t, err)
 
 	ctx := context.Background()
@@ -440,7 +439,7 @@ func TestStreamOutput_HandlesScannerError(t *testing.T) {
 	wg.Add(1)
 
 	// Close the writer to cause an error
-	pw.Close()
+	_ = pw.Close()
 
 	// Should complete without panic even with error
 	streamOutput(scanner, &output, &wg)
@@ -512,21 +511,21 @@ func TestStdout(t *testing.T) {
 
 	select {
 	case <-testCompleteChan:
-		w.Close()
+		_ = w.Close()
 		os.Stdout = oldStdout
 
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
-		r.Close()
+		_, _ = io.Copy(&buf, r)
+		_ = r.Close()
 		output := buf.String()
 
 		// Should have some output from test execution
 		// At minimum should show the command being run
 		assert.NotEmpty(t, output, "should capture stdout from test execution")
 	case <-time.After(15 * time.Second):
-		w.Close()
+		_ = w.Close()
 		os.Stdout = oldStdout
-		r.Close()
+		_ = r.Close()
 		t.Fatal("timeout")
 	}
 }
@@ -553,19 +552,19 @@ func TestRunTests_CreatesStderrPipe(t *testing.T) {
 
 	select {
 	case <-testCompleteChan:
-		w.Close()
+		_ = w.Close()
 		os.Stderr = oldStderr
 
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
-		r.Close()
+		_, _ = io.Copy(&buf, r)
+		_ = r.Close()
 		// Should have captured stderr (error about nonexistent path)
 		// Note: may be empty if all output goes to stdout
 		t.Logf("stderr output: %s", buf.String())
 	case <-time.After(10 * time.Second):
-		w.Close()
+		_ = w.Close()
 		os.Stderr = oldStderr
-		r.Close()
+		_ = r.Close()
 		t.Fatal("timeout")
 	}
 }
@@ -674,19 +673,4 @@ func TestStreamOutput_ConcurrentSafety(t *testing.T) {
 	case <-time.After(1 * time.Second):
 		t.Fatal("concurrent streamOutput calls did not complete")
 	}
-}
-
-// Helper function to create a test command for controlled testing
-func createTestCommand(t *testing.T, exitCode int, stdoutText, stderrText string) *exec.Cmd {
-	script := `#!/bin/bash
-echo "` + stdoutText + `"
-echo "` + stderrText + `" >&2
-exit ` + string(rune(exitCode+'0')) + `
-`
-	tempDir := t.TempDir()
-	scriptPath := filepath.Join(tempDir, "test.sh")
-	err := os.WriteFile(scriptPath, []byte(script), 0o755)
-	require.NoError(t, err)
-
-	return exec.Command(scriptPath)
 }

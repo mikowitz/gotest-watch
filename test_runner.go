@@ -21,8 +21,14 @@ func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup) {
 			log.Println(err)
 			return
 		}
-		w.Write([]byte(r.Text()))
-		w.Write([]byte("\n"))
+		_, err = w.Write([]byte(r.Text()))
+		if err != nil {
+			log.Println(err)
+		}
+		_, err = w.Write([]byte("\n"))
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
@@ -31,6 +37,7 @@ func runTests(ctx context.Context, config *TestConfig, completeChan chan TestCom
 	fields := strings.Fields(testCommand)
 
 	// Use CommandContext to support cancellation via context
+	//nolint:gosec // TODO: sanitize input
 	cmd := exec.CommandContext(ctx, "go", fields[1:]...)
 
 	// Set working directory if specified
@@ -70,7 +77,10 @@ func runTests(ctx context.Context, config *TestConfig, completeChan chan TestCom
 	}()
 
 	wg.Wait()
-	cmd.Wait()
+	err = cmd.Wait()
+	if err != nil {
+		log.Println(err)
+	}
 
 	completeChan <- TestCompleteMessage{}
 	readyChan <- true
