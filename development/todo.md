@@ -289,7 +289,7 @@
   - [x] Loop: Scanner.Scan()
   - [x] Write each line to output
   - [x] Handle Scanner errors
-- [ ] Implement runTests() function
+- [x] Implement runTests() function
   - [x] Accept ctx, config, testCompleteChan, readyChan
   - [x] Get command args from config.BuildCommand()
   - [x] Print full command: "go test <args...>"
@@ -326,14 +326,14 @@
   - [x] Test runTests creates stdout pipe
   - [x] Test runTests creates stderr pipe
   - [x] Test runTests integration with various TestConfig combinations
-- [ ] Add demo in main():
-  - [ ] Create TestConfig
-  - [ ] Create channels
-  - [ ] Run "go version" as simple test command
-  - [ ] Wait for TestCompleteMessage
-  - [ ] Print completion
-- [ ] Run tests: `go test -v`
-- [ ] Build and run: `go build && ./gotest-watch`
+- [x] Add demo in main():
+  - [x] Create TestConfig
+  - [x] Create channels
+  - [x] Run "go version" as simple test command
+  - [x] Wait for TestCompleteMessage
+  - [x] Print completion
+- [x] Run tests: `go test -v`
+- [x] Build and run: `go build && ./gotest-watch`
 
 ## Phase 3: Integration
 

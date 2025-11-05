@@ -32,6 +32,7 @@ func main() {
 	cmdChan := make(chan CommandMessage, 10)
 	helpChan := make(chan HelpMessage, 10)
 	fileChangeChan := make(chan FileChangeMessage, 10)
+	testCompleteChan := make(chan TestCompleteMessage, 10)
 	readyChan := make(chan bool, 1)
 
 	// Start file watcher in background
@@ -45,9 +46,6 @@ func main() {
 	// Start stdin reader in background
 	go readStdin(ctx, os.Stdin, cmdChan, helpChan, readyChan)
 
-	// Signal that we're ready to process commands
-	readyChan <- true
-
 	// Create test config for command handlers
 	config := &TestConfig{
 		TestPath:   "./...",
@@ -55,13 +53,25 @@ func main() {
 		RunPattern: "",
 	}
 
+	// Signal that we're ready to process commands and show initial prompt
+	readyChan <- true
+	fmt.Print("> ")
+
 	// Message handling loop
 	for {
 		select {
 		case cmd := <-cmdChan:
-			// Execute command through registry
-			if err := handleCommand(cmd.Command, config, cmd.Args); err != nil {
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			// Handle force run command specially (needs channels)
+			if cmd.Command == ForceRunCmd {
+				fmt.Println("==> Running tests...")
+				go runTests(ctx, config, testCompleteChan, readyChan)
+			} else {
+				// Execute other commands through registry
+				if err := handleCommand(cmd.Command, config, cmd.Args); err != nil {
+					fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				}
+				// Show prompt after command completes
+				fmt.Print("> ")
 			}
 
 		case <-helpChan:
@@ -69,10 +79,17 @@ func main() {
 			if err := handleHelp(config, nil); err != nil {
 				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			}
+			// Show prompt after help
+			fmt.Print("> ")
 
 		case <-fileChangeChan:
-			// File change detected
-			fmt.Println("\n==> File change detected")
+			// File change detected - run tests automatically
+			fmt.Println("\n==> File change detected, running tests...")
+			go runTests(ctx, config, testCompleteChan, readyChan)
+
+		case <-testCompleteChan:
+			// Tests completed
+			fmt.Print("==> Tests completed\n> ")
 		}
 	}
 }

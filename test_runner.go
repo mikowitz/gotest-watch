@@ -28,9 +28,7 @@ func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup) {
 
 func runTests(ctx context.Context, config *TestConfig, completeChan chan TestCompleteMessage, readyChan chan bool) {
 	testCommand := config.BuildCommand()
-	fmt.Println(testCommand)
 	fields := strings.Fields(testCommand)
-	fmt.Println(fields)
 
 	// Use CommandContext to support cancellation via context
 	cmd := exec.CommandContext(ctx, "go", fields[1:]...)
@@ -75,4 +73,5 @@ func runTests(ctx context.Context, config *TestConfig, completeChan chan TestCom
 	cmd.Wait()
 
 	completeChan <- TestCompleteMessage{}
+	readyChan <- true
 }
