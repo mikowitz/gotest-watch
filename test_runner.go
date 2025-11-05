@@ -66,14 +66,18 @@ func runTests(ctx context.Context, config *TestConfig, completeChan chan TestCom
 	var wg sync.WaitGroup
 	wg.Add(2)
 
+	// Capture stdout/stderr before starting goroutines to avoid data race
+	stdoutWriter := os.Stdout
+	stderrWriter := os.Stderr
+
 	go func() {
 		r := bufio.NewScanner(stdout)
-		streamOutput(r, os.Stdout, &wg)
+		streamOutput(r, stdoutWriter, &wg)
 	}()
 
 	go func() {
 		r := bufio.NewScanner(stderr)
-		streamOutput(r, os.Stderr, &wg)
+		streamOutput(r, stderrWriter, &wg)
 	}()
 
 	wg.Wait()
