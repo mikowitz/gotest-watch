@@ -60,8 +60,9 @@ func handleCls(_ *TestConfig, _ []string) error {
 }
 
 func handleRun(_ *TestConfig, _ []string) error {
-	fmt.Println("running tests...")
-
+	// This handler is no longer used - the force run command is handled
+	// directly in main.go because it needs access to channels
+	// Keeping this for backwards compatibility with tests
 	return nil
 }
 

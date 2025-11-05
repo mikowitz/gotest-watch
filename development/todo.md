@@ -280,52 +280,60 @@
 
 ### Step 8: Test Runner
 
-- [ ] Define channel type:
-  - [ ] testCompleteChan: chan TestCompleteMessage
-- [ ] Implement streamOutput() helper
-  - [ ] Accept bufio.Scanner and io.Writer
-  - [ ] Accept sync.WaitGroup
-  - [ ] Defer wg.Done()
-  - [ ] Loop: Scanner.Scan()
-  - [ ] Write each line to output
-  - [ ] Handle Scanner errors
-- [ ] Implement runTests() function
-  - [ ] Accept ctx, config, testCompleteChan, readyChan
-  - [ ] Get command args from config.BuildCommand()
-  - [ ] Print full command: "go test <args...>"
-  - [ ] Create exec.Command("go", args...)
-  - [ ] Get stdout pipe with cmd.StdoutPipe()
-  - [ ] Get stderr pipe with cmd.StderrPipe()
-  - [ ] Start command with cmd.Start()
-  - [ ] Create WaitGroup with count 2
-  - [ ] Launch goroutine for stdout streaming
-    - [ ] Create bufio.Scanner from stdout pipe
-    - [ ] Call streamOutput with scanner, os.Stdout, wg
-  - [ ] Launch goroutine for stderr streaming
-    - [ ] Create bufio.Scanner from stderr pipe
-    - [ ] Call streamOutput with scanner, os.Stderr, wg
-  - [ ] Wait for both scanner goroutines (wg.Wait())
-  - [ ] Wait for command to finish (cmd.Wait())
-  - [ ] Send TestCompleteMessage to testCompleteChan
-- [ ] Write tests:
-  - [ ] Create test script that prints to both stdout and stderr
-  - [ ] Mock TestConfig with known values
-  - [ ] Capture stdout/stderr during test
-  - [ ] Call runTests with test command
-  - [ ] Verify both stdout and stderr are captured
-  - [ ] Verify TestCompleteMessage is sent
-  - [ ] Verify command is built correctly from TestConfig
-  - [ ] Test with command that exits with error (non-zero)
-  - [ ] Verify test completes and sends message anyway
-  - [ ] Test WaitGroup waits for both scanners
-- [ ] Add demo in main():
-  - [ ] Create TestConfig
-  - [ ] Create channels
-  - [ ] Run "go version" as simple test command
-  - [ ] Wait for TestCompleteMessage
-  - [ ] Print completion
-- [ ] Run tests: `go test -v`
-- [ ] Build and run: `go build && ./gotest-watch`
+- [x] Define channel type:
+  - [x] testCompleteChan: chan TestCompleteMessage
+- [x] Implement streamOutput() helper
+  - [x] Accept bufio.Scanner and io.Writer
+  - [x] Accept sync.WaitGroup
+  - [x] Defer wg.Done()
+  - [x] Loop: Scanner.Scan()
+  - [x] Write each line to output
+  - [x] Handle Scanner errors
+- [x] Implement runTests() function
+  - [x] Accept ctx, config, testCompleteChan, readyChan
+  - [x] Get command args from config.BuildCommand()
+  - [x] Print full command: "go test <args...>"
+  - [x] Create exec.Command("go", args...)
+  - [x] Get stdout pipe with cmd.StdoutPipe()
+  - [x] Get stderr pipe with cmd.StderrPipe()
+  - [x] Start command with cmd.Start()
+  - [x] Create WaitGroup with count 2
+  - [x] Launch goroutine for stdout streaming
+    - [x] Create bufio.Scanner from stdout pipe
+    - [x] Call streamOutput with scanner, os.Stdout, wg
+  - [x] Launch goroutine for stderr streaming
+    - [x] Create bufio.Scanner from stderr pipe
+    - [x] Call streamOutput with scanner, os.Stderr, wg
+  - [x] Wait for both scanner goroutines (wg.Wait())
+  - [x] Wait for command to finish (cmd.Wait())
+  - [x] Send TestCompleteMessage to testCompleteChan
+- [x] Write tests (20 test functions in test_runner_test.go):
+  - [x] Test streamOutput reads all lines
+  - [x] Test streamOutput calls wg.Done()
+  - [x] Test streamOutput handles empty input
+  - [x] Test streamOutput preserves line content
+  - [x] Test streamOutput handles scanner errors
+  - [x] Test streamOutput writes line by line
+  - [x] Test streamOutput concurrent safety
+  - [x] Test runTests sends TestCompleteMessage
+  - [x] Test runTests builds correct command from config
+  - [x] Test runTests streams stdout and stderr
+  - [x] Test runTests handles command failure (non-zero exit)
+  - [x] Test runTests waits for both streamers (WaitGroup)
+  - [x] Test runTests displays command before running
+  - [x] Test runTests context cancellation
+  - [x] Test runTests uses correct go command
+  - [x] Test runTests creates stdout pipe
+  - [x] Test runTests creates stderr pipe
+  - [x] Test runTests integration with various TestConfig combinations
+- [x] Add demo in main():
+  - [x] Create TestConfig
+  - [x] Create channels
+  - [x] Run "go version" as simple test command
+  - [x] Wait for TestCompleteMessage
+  - [x] Print completion
+- [x] Run tests: `go test -v`
+- [x] Build and run: `go build && ./gotest-watch`
 
 ## Phase 3: Integration
 
