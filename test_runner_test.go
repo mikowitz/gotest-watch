@@ -43,7 +43,6 @@ func waitForTestCompletion(
 	t *testing.T,
 	testCompleteChan chan TestCompleteMessage,
 	readyChan chan bool,
-	timeout time.Duration,
 ) {
 	t.Helper()
 
@@ -51,7 +50,7 @@ func waitForTestCompletion(
 	select {
 	case <-testCompleteChan:
 		// Success - message was sent
-	case <-time.After(timeout):
+	case <-time.After(30 * time.Second):
 		t.Fatal("TestCompleteMessage was not sent within timeout")
 	}
 
@@ -160,7 +159,7 @@ func TestExample(t *testing.T) {
 	// Run a simple command that will succeed
 	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
-	waitForTestCompletion(t, testCompleteChan, readyChan, 30*time.Second)
+	waitForTestCompletion(t, testCompleteChan, readyChan)
 }
 
 // TestRunTests_BuildsCorrectCommand tests that runTests uses config.BuildCommand()
@@ -188,7 +187,7 @@ func TestFoo(t *testing.T) {
 
 	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
-	waitForTestCompletion(t, testCompleteChan, readyChan, 30*time.Second)
+	waitForTestCompletion(t, testCompleteChan, readyChan)
 }
 
 // TestRunTests_StreamsStdoutAndStderr tests that both streams are captured
@@ -223,7 +222,7 @@ func TestWithOutput(t *testing.T) {
 
 	go runTests(ctx, config, testCompleteChan, readyChan, wOut, wErr)
 
-	waitForTestCompletion(t, testCompleteChan, readyChan, 30*time.Second)
+	waitForTestCompletion(t, testCompleteChan, readyChan)
 
 	// Close writers and read outputs
 	_ = wOut.Close()
@@ -269,7 +268,7 @@ func TestFailure(t *testing.T) {
 
 	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
-	waitForTestCompletion(t, testCompleteChan, readyChan, 30*time.Second)
+	waitForTestCompletion(t, testCompleteChan, readyChan)
 }
 
 // TestRunTests_WaitsForBothStreamers tests that WaitGroup properly waits for both goroutines
@@ -298,7 +297,7 @@ func TestWait(t *testing.T) {
 	start := time.Now()
 	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
-	waitForTestCompletion(t, testCompleteChan, readyChan, 30*time.Second)
+	waitForTestCompletion(t, testCompleteChan, readyChan)
 
 	duration := time.Since(start)
 	// Should take some time to run tests (streaming takes time)
@@ -331,7 +330,7 @@ func TestPattern(t *testing.T) {
 
 	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
-	waitForTestCompletion(t, testCompleteChan, readyChan, 30*time.Second)
+	waitForTestCompletion(t, testCompleteChan, readyChan)
 }
 
 // TestRunTests_ContextCancellation tests that runTests respects context cancellation
