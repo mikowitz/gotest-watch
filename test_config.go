@@ -6,6 +6,7 @@ type TestConfig struct {
 	TestPath   string
 	Verbose    bool
 	RunPattern string
+	WorkingDir string // Optional: if set, tests will run in this directory
 }
 
 func NewTestConfig() *TestConfig {

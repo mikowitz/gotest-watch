@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -12,7 +14,21 @@ func main() {
 
 	fmt.Println("gotest-watch started")
 
-	ctx := context.Background()
+	// Create a cancellable context for graceful shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Set up signal handling for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		sig := <-sigChan
+		fmt.Printf("\n\nReceived signal: %v\n", sig)
+		fmt.Println("Shutting down gracefully...")
+		cancel() // Cancel context to stop all goroutines
+		os.Exit(0)
+	}()
+
 	cmdChan := make(chan CommandMessage, 10)
 	helpChan := make(chan HelpMessage, 10)
 	fileChangeChan := make(chan FileChangeMessage, 10)
