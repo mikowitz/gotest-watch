@@ -6,7 +6,8 @@
       "Bash(gh pr diff:*)",
       "Bash(gh pr:*)",
       "Bash(go clean:*)",
-      "Bash(gh run view:*)"
+      "Bash(gh run view:*)",
+      "Bash(go build:*)"
     ],
     "deny": [],
     "ask": []

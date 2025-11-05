@@ -37,6 +37,33 @@ go 1.24
 	return tempDir
 }
 
+// waitForTestCompletion waits for both testCompleteChan and readyChan to ensure
+// runTests has fully completed before the test returns (preventing premature cleanup of temp directories)
+func waitForTestCompletion(
+	t *testing.T,
+	testCompleteChan chan TestCompleteMessage,
+	readyChan chan bool,
+	timeout time.Duration,
+) {
+	t.Helper()
+
+	// Wait for completion message
+	select {
+	case <-testCompleteChan:
+		// Success - message was sent
+	case <-time.After(timeout):
+		t.Fatal("TestCompleteMessage was not sent within timeout")
+	}
+
+	// Also drain readyChan to ensure runTests has fully completed
+	select {
+	case <-readyChan:
+		// runTests fully completed
+	case <-time.After(1 * time.Second):
+		t.Fatal("readyChan not received after completion")
+	}
+}
+
 // TestStreamOutput_ReadsAllLines tests that streamOutput reads and writes all lines
 func TestStreamOutput_ReadsAllLines(t *testing.T) {
 	input := "line1\nline2\nline3\n"
@@ -133,13 +160,7 @@ func TestExample(t *testing.T) {
 	// Run a simple command that will succeed
 	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
-	// Wait for completion message
-	select {
-	case <-testCompleteChan:
-		// Success - message was sent
-	case <-time.After(5 * time.Second):
-		t.Fatal("TestCompleteMessage was not sent within timeout")
-	}
+	waitForTestCompletion(t, testCompleteChan, readyChan, 5*time.Second)
 }
 
 // TestRunTests_BuildsCorrectCommand tests that runTests uses config.BuildCommand()
@@ -167,13 +188,7 @@ func TestFoo(t *testing.T) {
 
 	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
-	// Wait for completion
-	select {
-	case <-testCompleteChan:
-		// Success - the test ran with the correct configuration
-	case <-time.After(5 * time.Second):
-		t.Fatal("timeout waiting for test completion")
-	}
+	waitForTestCompletion(t, testCompleteChan, readyChan, 5*time.Second)
 }
 
 // TestRunTests_StreamsStdoutAndStderr tests that both streams are captured
@@ -208,13 +223,7 @@ func TestWithOutput(t *testing.T) {
 
 	go runTests(ctx, config, testCompleteChan, readyChan, wOut, wErr)
 
-	// Wait for completion
-	select {
-	case <-testCompleteChan:
-		// Success
-	case <-time.After(10 * time.Second):
-		t.Fatal("timeout waiting for test completion")
-	}
+	waitForTestCompletion(t, testCompleteChan, readyChan, 10*time.Second)
 
 	// Close writers and read outputs
 	_ = wOut.Close()
@@ -260,13 +269,7 @@ func TestFailure(t *testing.T) {
 
 	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
-	// Should still send completion message even though tests failed
-	select {
-	case <-testCompleteChan:
-		// Success - completion message sent even on failure
-	case <-time.After(10 * time.Second):
-		t.Fatal("TestCompleteMessage not sent even though command failed")
-	}
+	waitForTestCompletion(t, testCompleteChan, readyChan, 10*time.Second)
 }
 
 // TestRunTests_WaitsForBothStreamers tests that WaitGroup properly waits for both goroutines
@@ -295,16 +298,12 @@ func TestWait(t *testing.T) {
 	start := time.Now()
 	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
-	// Wait for completion
-	select {
-	case <-testCompleteChan:
-		duration := time.Since(start)
-		// Should take some time to run tests (streaming takes time)
-		// If WaitGroup wasn't working, it might return too quickly
-		t.Logf("Tests completed in %v", duration)
-	case <-time.After(15 * time.Second):
-		t.Fatal("timeout waiting for test completion")
-	}
+	waitForTestCompletion(t, testCompleteChan, readyChan, 15*time.Second)
+
+	duration := time.Since(start)
+	// Should take some time to run tests (streaming takes time)
+	// If WaitGroup wasn't working, it might return too quickly
+	t.Logf("Tests completed in %v", duration)
 }
 
 // TestRunTests_DisplaysCommandBeforeRunning tests that runTests executes with config
@@ -332,13 +331,7 @@ func TestPattern(t *testing.T) {
 
 	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 
-	// Wait for completion
-	select {
-	case <-testCompleteChan:
-		// Success - the test ran with the configuration
-	case <-time.After(10 * time.Second):
-		t.Fatal("timeout")
-	}
+	waitForTestCompletion(t, testCompleteChan, readyChan, 10*time.Second)
 }
 
 // TestRunTests_ContextCancellation tests that runTests respects context cancellation
@@ -506,6 +499,9 @@ func TestStdout(t *testing.T) {
 
 	select {
 	case <-testCompleteChan:
+		// Drain readyChan before cleanup
+		<-readyChan
+
 		_ = w.Close()
 		os.Stdout = oldStdout
 
@@ -547,6 +543,9 @@ func TestRunTests_CreatesStderrPipe(t *testing.T) {
 
 	select {
 	case <-testCompleteChan:
+		// Drain readyChan before cleanup
+		<-readyChan
+
 		_ = w.Close()
 		os.Stderr = oldStderr
 
@@ -624,6 +623,8 @@ func TestTwo(t *testing.T) {
 
 			select {
 			case <-testCompleteChan:
+				// Drain readyChan before test cleanup
+				<-readyChan
 				// Success - each config should work
 			case <-time.After(15 * time.Second):
 				t.Fatalf("timeout with config: %+v", tc.config)
