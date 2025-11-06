@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func dispatcher(
@@ -22,17 +23,47 @@ func dispatcher(
 	for {
 		if testRunning {
 			// While test is running, only listen for test completion and context cancellation
-			// Ignore file changes and user commands
+			// Ignore file changes and user commands (but show feedback for commands)
 			select {
 			case <-fileChangeChan:
 				// Ignore file changes while test is running
-			case <-commandChan:
-				// Ignore user commands while test is running
+			case cmd := <-commandChan:
+				// Show the full line that was typed, so user knows what was ignored
+				fullCmd := string(cmd.Command)
+				if len(cmd.Args) > 0 {
+					fullCmd = fullCmd + " " + strings.Join(cmd.Args, " ")
+				}
+				fmt.Printf("\n(Tests running - ignored input: '%s')\n", fullCmd)
 			case <-helpChan:
-				// Ignore help requests while test is running
+				// Show that help was requested but ignored
+				fmt.Println("\n(Tests running - ignored input: 'h')")
 			case <-testCompleteChan:
 				testRunning = false
-				// fmt.Println()
+
+				// Drain any commands that accumulated during test run
+				drainedCommands := 0
+				drainedHelp := 0
+			drainLoop:
+				for {
+					select {
+					case cmd := <-commandChan:
+						drainedCommands++
+						fullCmd := string(cmd.Command)
+						if len(cmd.Args) > 0 {
+							fullCmd = fullCmd + " " + strings.Join(cmd.Args, " ")
+						}
+						fmt.Printf("(Ignored during test: '%s')\n", fullCmd)
+					case <-helpChan:
+						drainedHelp++
+						fmt.Println("(Ignored during test: 'h')")
+					default:
+						break drainLoop
+					}
+				}
+
+				if drainedCommands > 0 || drainedHelp > 0 {
+					fmt.Println()
+				}
 				fmt.Print("> ")
 			case <-ctx.Done():
 				// Wait for test to finish before shutting down
