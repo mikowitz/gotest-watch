@@ -64,6 +64,8 @@ func dispatcher(
 				if drainedCommands > 0 || drainedHelp > 0 {
 					fmt.Println()
 				}
+
+				// Show prompt
 				fmt.Print("> ")
 			case <-ctx.Done():
 				// Wait for test to finish before shutting down
