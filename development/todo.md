@@ -339,61 +339,61 @@
 
 ### Step 9: Dispatcher & Integration
 
-- [ ] Implement dispatcher() function
-  - [ ] Accept ctx, config, all channel types
-  - [ ] Initialize testRunning bool to false
-  - [ ] Create infinite loop with select:
-    - [ ] Case fileChangeChan receive:
-      - [ ] If !testRunning:
-        - [ ] Spawn runTests goroutine
-        - [ ] Set testRunning = true
-        - [ ] Send false to readyChan
-    - [ ] Case commandChan receive:
-      - [ ] Call handleCommand with msg.Command, config, msg.Args
-      - [ ] If error: print to stderr
-      - [ ] If !testRunning:
-        - [ ] Spawn runTests goroutine
-        - [ ] Set testRunning = true
-        - [ ] Send false to readyChan
-    - [ ] Case helpChan receive:
-      - [ ] Call handleCommand("help", config, nil)
-      - [ ] Do NOT spawn test runner
-      - [ ] Do NOT change testRunning
-    - [ ] Case testCompleteChan receive:
-      - [ ] Set testRunning = false
-      - [ ] Send true to readyChan
-      - [ ] Print blank line
-      - [ ] Print prompt "> "
-    - [ ] Case ctx.Done():
-      - [ ] If testRunning: wait for TestCompleteMessage
-      - [ ] Print shutdown message
-      - [ ] Return
-- [ ] Update main() to wire everything:
-  - [ ] Create context with signal.NotifyContext (SIGINT, SIGTERM)
-  - [ ] Defer cancel()
-  - [ ] Initialize TestConfig with defaults
-  - [ ] Create all channels:
-    - [ ] fileChangeChan
-    - [ ] commandChan
-    - [ ] helpChan
-    - [ ] testCompleteChan
-    - [ ] readyChan
-  - [ ] Start watchFiles goroutine
-  - [ ] Start readStdin goroutine
-  - [ ] Call dispatcher (blocks in main goroutine)
-- [ ] Write tests:
-  - [ ] Mock all channels
-  - [ ] Test FileChangeMessage spawns test runner
-  - [ ] Test FileChangeMessage ignored when testRunning=true
-  - [ ] Test CommandMessage calls handler
-  - [ ] Test CommandMessage spawns test runner
-  - [ ] Test CommandMessage ignored when testRunning=true
-  - [ ] Test HelpMessage doesn't spawn test runner
-  - [ ] Test TestCompleteMessage updates state and re-enables stdin
-  - [ ] Test ctx.Done() waits for tests to finish
-  - [ ] Test ready channel receives correct values
-- [ ] Run tests: `go test -v`
-- [ ] Build and run: `go build && ./gotest-watch`
+- [x] Implement dispatcher() function
+  - [x] Accept ctx, config, all channel types
+  - [x] Initialize testRunning bool to false
+  - [x] Create infinite loop with select:
+    - [x] Case fileChangeChan receive:
+      - [x] If !testRunning:
+        - [x] Spawn runTests goroutine
+        - [x] Set testRunning = true
+        - [x] Send false to readyChan
+    - [x] Case commandChan receive:
+      - [x] Call handleCommand with msg.Command, config, msg.Args
+      - [x] If error: print to stderr
+      - [x] If !testRunning:
+        - [x] Spawn runTests goroutine
+        - [x] Set testRunning = true
+        - [x] Send false to readyChan
+    - [x] Case helpChan receive:
+      - [x] Call handleCommand("help", config, nil)
+      - [x] Do NOT spawn test runner
+      - [x] Do NOT change testRunning
+    - [x] Case testCompleteChan receive:
+      - [x] Set testRunning = false
+      - [x] Send true to readyChan
+      - [x] Print blank line
+      - [x] Print prompt "> "
+    - [x] Case ctx.Done():
+      - [x] If testRunning: wait for TestCompleteMessage
+      - [x] Print shutdown message
+      - [x] Return
+- [x] Update main() to wire everything:
+  - [x] Create context with signal.NotifyContext (SIGINT, SIGTERM)
+  - [x] Defer cancel()
+  - [x] Initialize TestConfig with defaults
+  - [x] Create all channels:
+    - [x] fileChangeChan
+    - [x] commandChan
+    - [x] helpChan
+    - [x] testCompleteChan
+    - [x] readyChan
+  - [x] Start watchFiles goroutine
+  - [x] Start readStdin goroutine
+  - [x] Call dispatcher (blocks in main goroutine)
+- [x] Write tests:
+  - [x] Mock all channels
+  - [x] Test FileChangeMessage spawns test runner
+  - [x] Test FileChangeMessage ignored when testRunning=true
+  - [x] Test CommandMessage calls handler
+  - [x] Test CommandMessage spawns test runner
+  - [x] Test CommandMessage ignored when testRunning=true
+  - [x] Test HelpMessage doesn't spawn test runner
+  - [x] Test TestCompleteMessage updates state and re-enables stdin
+  - [x] Test ctx.Done() waits for tests to finish
+  - [x] Test ready channel receives correct values
+- [x] Run tests: `go test -v`
+- [x] Build and run: `go build && ./gotest-watch`
 - [ ] Manual test: start tool, type commands, save files, verify behavior
 
 ### Step 10: Context & Lifecycle

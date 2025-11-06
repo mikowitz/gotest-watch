@@ -54,43 +54,6 @@ func main() {
 		RunPattern: "",
 	}
 
-	// Signal that we're ready to process commands and show initial prompt
-	readyChan <- true
-	fmt.Print("> ")
-
-	// Message handling loop
-	for {
-		select {
-		case cmd := <-cmdChan:
-			// Handle force run command specially (needs channels)
-			if cmd.Command == ForceRunCmd {
-				fmt.Println("==> Running tests...")
-				go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
-			} else {
-				// Execute other commands through registry
-				if err := handleCommand(cmd.Command, config, cmd.Args); err != nil {
-					fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-				}
-				// Show prompt after command completes
-				fmt.Print("> ")
-			}
-
-		case <-helpChan:
-			// Handle help command
-			if err := handleHelp(config, nil); err != nil {
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			}
-			// Show prompt after help
-			fmt.Print("> ")
-
-		case <-fileChangeChan:
-			// File change detected - run tests automatically
-			fmt.Println("\n==> File change detected, running tests...")
-			go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
-
-		case <-testCompleteChan:
-			// Tests completed
-			fmt.Print("==> Tests completed\n> ")
-		}
-	}
+	// Start dispatcher (blocks until context is cancelled)
+	dispatcher(ctx, config, fileChangeChan, cmdChan, helpChan, testCompleteChan, readyChan)
 }
