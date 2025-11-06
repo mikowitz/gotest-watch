@@ -53,6 +53,9 @@ func dispatcher(
 				testRunning = true
 				readyChan <- false
 				go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
+			} else {
+				// Show prompt after non-test commands
+				fmt.Print("> ")
 			}
 
 		case <-helpChan:
@@ -60,6 +63,8 @@ func dispatcher(
 			if err := handleHelp(config, nil); err != nil {
 				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			}
+			// Show prompt after help
+			fmt.Print("> ")
 
 		case <-testCompleteChan:
 			testRunning = false
