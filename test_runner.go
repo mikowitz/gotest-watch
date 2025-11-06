@@ -32,12 +32,10 @@ func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup) {
 	}
 }
 
-//nolint:funlen
 func runTests(
 	ctx context.Context,
 	config *TestConfig,
 	completeChan chan TestCompleteMessage,
-	readyChan chan bool,
 	stdoutWriter io.Writer,
 	stderrWriter io.Writer,
 ) {
@@ -99,5 +97,4 @@ func runTests(
 	}
 
 	completeChan <- TestCompleteMessage{}
-	readyChan <- true
 }

@@ -21,52 +21,18 @@ func parseCommand(input string) (Command, []string) {
 }
 
 // readStdin reads commands from stdin and sends them to the appropriate channels.
-// The readyChan parameter controls whether stdin processing is active or paused.
-//
-// IMPORTANT: readyChan MUST be buffered (capacity >= 1) to prevent deadlocks.
-// The non-blocking select means readStdin isn't always listening on readyChan.
-// If readyChan is unbuffered, senders will block indefinitely when readStdin isn't receiving.
-//
-//nolint:funlen
+// It runs continuously in a goroutine, and the dispatcher decides whether to
+// process or ignore commands based on whether tests are running.
 func readStdin(
 	ctx context.Context,
 	r io.Reader,
 	cmdChan chan CommandMessage,
 	helpChan chan HelpMessage,
-	readyChan chan bool,
 ) {
 	scanner := bufio.NewScanner(r)
-	ready := false
 
-	for {
-		// Wait until ready
-		for !ready {
-			select {
-			case ready = <-readyChan:
-			case <-ctx.Done():
-				return
-			}
-		}
-
-		// Check for ready state change (non-blocking) before scanning
-		select {
-		case ready = <-readyChan:
-		case <-ctx.Done():
-			return
-		default:
-		}
-
-		// If not ready, loop back to wait
-		if !ready {
-			continue
-		}
-
-		// Scan next line
-		if !scanner.Scan() {
-			break
-		}
-
-		// Check if context was cancelled while we were scanning
+	for scanner.Scan() {
+		// Check if context was cancelled
 		select {
 		case <-ctx.Done():
 			return

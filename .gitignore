@@ -33,3 +33,5 @@ gotest-watch
 # Temporary files
 tmp/
 temp/
+
+gotest-watch.log

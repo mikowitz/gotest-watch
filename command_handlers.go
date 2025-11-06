@@ -6,8 +6,8 @@ import (
 )
 
 func handleVerbose(config *TestConfig, _ []string) error {
-	config.Verbose = !config.Verbose
-	if config.Verbose {
+	config.ToggleVerbose()
+	if config.GetVerbose() {
 		fmt.Println("Verbose: enabled")
 	} else {
 		fmt.Println("Verbose: disabled")
@@ -16,21 +16,19 @@ func handleVerbose(config *TestConfig, _ []string) error {
 }
 
 func handleClear(config *TestConfig, _ []string) error {
-	config.TestPath = "./..."
-	config.Verbose = false
-	config.RunPattern = ""
+	config.Clear()
 	fmt.Println("All parameters cleared")
 	return nil
 }
 
 func handleRunPattern(config *TestConfig, args []string) error {
 	if len(args) == 0 {
-		config.RunPattern = ""
+		config.SetRunPattern("")
 		fmt.Println("Run pattern: cleared")
 		return nil
 	}
 	pattern := args[0]
-	config.RunPattern = pattern
+	config.SetRunPattern(pattern)
 	fmt.Printf("Run pattern: %s\n", pattern)
 	return nil
 }
@@ -49,7 +47,7 @@ func handleTestPath(config *TestConfig, args []string) error {
 			return fmt.Errorf("path %q is not a directory", path)
 		}
 	}
-	config.TestPath = path
+	config.SetTestPath(path)
 	fmt.Println("Test path:", path)
 	return nil
 }

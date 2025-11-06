@@ -37,12 +37,11 @@ go 1.24
 	return tempDir
 }
 
-// waitForTestCompletion waits for both testCompleteChan and readyChan to ensure
+// waitForTestCompletion waits for testCompleteChan to ensure
 // runTests has fully completed before the test returns (preventing premature cleanup of temp directories)
 func waitForTestCompletion(
 	t *testing.T,
 	testCompleteChan chan TestCompleteMessage,
-	readyChan chan bool,
 ) {
 	t.Helper()
 
@@ -52,14 +51,6 @@ func waitForTestCompletion(
 		// Success - message was sent
 	case <-time.After(30 * time.Second):
 		t.Fatal("TestCompleteMessage was not sent within timeout")
-	}
-
-	// Also drain readyChan to ensure runTests has fully completed
-	select {
-	case <-readyChan:
-		// runTests fully completed
-	case <-time.After(1 * time.Second):
-		t.Fatal("readyChan not received after completion")
 	}
 }
 
@@ -154,12 +145,11 @@ func TestExample(t *testing.T) {
 	}
 
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	readyChan := make(chan bool, 1)
 
 	// Run a simple command that will succeed
-	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
+	go runTests(ctx, config, testCompleteChan, nil, nil)
 
-	waitForTestCompletion(t, testCompleteChan, readyChan)
+	waitForTestCompletion(t, testCompleteChan)
 }
 
 // TestRunTests_BuildsCorrectCommand tests that runTests uses config.BuildCommand()
@@ -183,11 +173,9 @@ func TestFoo(t *testing.T) {
 	}
 
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	readyChan := make(chan bool, 1)
+	go runTests(ctx, config, testCompleteChan, nil, nil)
 
-	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
-
-	waitForTestCompletion(t, testCompleteChan, readyChan)
+	waitForTestCompletion(t, testCompleteChan)
 }
 
 // TestRunTests_StreamsStdoutAndStderr tests that both streams are captured
@@ -214,15 +202,14 @@ func TestWithOutput(t *testing.T) {
 	}
 
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	readyChan := make(chan bool, 1)
 
 	// Capture both stdout and stderr using pipes
 	rOut, wOut, _ := os.Pipe()
 	rErr, wErr, _ := os.Pipe()
 
-	go runTests(ctx, config, testCompleteChan, readyChan, wOut, wErr)
+	go runTests(ctx, config, testCompleteChan, wOut, wErr)
 
-	waitForTestCompletion(t, testCompleteChan, readyChan)
+	waitForTestCompletion(t, testCompleteChan)
 
 	// Close writers and read outputs
 	_ = wOut.Close()
@@ -264,11 +251,9 @@ func TestFailure(t *testing.T) {
 	}
 
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	readyChan := make(chan bool, 1)
+	go runTests(ctx, config, testCompleteChan, nil, nil)
 
-	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
-
-	waitForTestCompletion(t, testCompleteChan, readyChan)
+	waitForTestCompletion(t, testCompleteChan)
 }
 
 // TestRunTests_WaitsForBothStreamers tests that WaitGroup properly waits for both goroutines
@@ -292,12 +277,11 @@ func TestWait(t *testing.T) {
 	}
 
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	readyChan := make(chan bool, 1)
 
 	start := time.Now()
-	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
+	go runTests(ctx, config, testCompleteChan, nil, nil)
 
-	waitForTestCompletion(t, testCompleteChan, readyChan)
+	waitForTestCompletion(t, testCompleteChan)
 
 	duration := time.Since(start)
 	// Should take some time to run tests (streaming takes time)
@@ -326,11 +310,9 @@ func TestPattern(t *testing.T) {
 	}
 
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	readyChan := make(chan bool, 1)
+	go runTests(ctx, config, testCompleteChan, nil, nil)
 
-	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
-
-	waitForTestCompletion(t, testCompleteChan, readyChan)
+	waitForTestCompletion(t, testCompleteChan)
 }
 
 // TestRunTests_ContextCancellation tests that runTests respects context cancellation
@@ -354,7 +336,6 @@ func TestCancel(t *testing.T) {
 	}
 
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	readyChan := make(chan bool, 1)
 
 	// Cancel context immediately
 	cancel()
@@ -362,7 +343,7 @@ func TestCancel(t *testing.T) {
 	// Create a done channel to track if runTests completes
 	done := make(chan struct{})
 	go func() {
-		runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
+		runTests(ctx, config, testCompleteChan, nil, nil)
 		close(done)
 	}()
 
@@ -401,15 +382,12 @@ func TestCommand(t *testing.T) {
 	}
 
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	readyChan := make(chan bool, 1)
 
-	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
+	go runTests(ctx, config, testCompleteChan, nil, nil)
 
 	// Wait for completion
 	select {
 	case msg := <-testCompleteChan:
-		// Drain readyChan before test cleanup
-		<-readyChan
 		// Verify we got the right message type
 		assert.Equal(t, MessageTypeTestComplete, msg.Type(), "should return TestCompleteMessage")
 	case <-time.After(30 * time.Second):
@@ -489,20 +467,16 @@ func TestStdout(t *testing.T) {
 	}
 
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	readyChan := make(chan bool, 1)
 
 	// Capture stdout to verify output is streamed
 	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
+	go runTests(ctx, config, testCompleteChan, nil, nil)
 
 	select {
 	case <-testCompleteChan:
-		// Drain readyChan before cleanup
-		<-readyChan
-
 		_ = w.Close()
 		os.Stdout = oldStdout
 
@@ -533,20 +507,16 @@ func TestRunTests_CreatesStderrPipe(t *testing.T) {
 	}
 
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	readyChan := make(chan bool, 1)
 
 	// Capture stderr
 	oldStderr := os.Stderr
 	r, w, _ := os.Pipe()
 	os.Stderr = w
 
-	go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
+	go runTests(ctx, config, testCompleteChan, nil, nil)
 
 	select {
 	case <-testCompleteChan:
-		// Drain readyChan before cleanup
-		<-readyChan
-
 		_ = w.Close()
 		os.Stderr = oldStderr
 
@@ -618,14 +588,11 @@ func TestTwo(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			testCompleteChan := make(chan TestCompleteMessage, 1)
-			readyChan := make(chan bool, 1)
 
-			go runTests(ctx, tc.config, testCompleteChan, readyChan, nil, nil)
+			go runTests(ctx, tc.config, testCompleteChan, nil, nil)
 
 			select {
 			case <-testCompleteChan:
-				// Drain readyChan before test cleanup
-				<-readyChan
 				// Success - each config should work
 			case <-time.After(30 * time.Second):
 				t.Fatalf("timeout with config: %+v", tc.config)
