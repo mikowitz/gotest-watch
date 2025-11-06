@@ -38,6 +38,7 @@ func dispatcher(
 		case <-fileChangeChan:
 			if !testRunning {
 				testRunning = true
+				fmt.Println("\nFile change detected, running tests...")
 				readyChan <- false
 				go runTests(ctx, config, testCompleteChan, readyChan, nil, nil)
 			}
