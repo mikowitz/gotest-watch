@@ -41,7 +41,7 @@ func TestHandleVerbose_TogglesFromFalseToTrue(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.True(t, config.Verbose, "Verbose should be toggled to true")
+	assert.True(t, config.GetVerbose(), "Verbose should be toggled to true")
 	assert.Equal(t, "Verbose: enabled\n", output, "Should print enabled message")
 }
 
@@ -58,7 +58,7 @@ func TestHandleVerbose_TogglesFromTrueToFalse(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.False(t, config.Verbose, "Verbose should be toggled to false")
+	assert.False(t, config.GetVerbose(), "Verbose should be toggled to false")
 	assert.Equal(t, "Verbose: disabled\n", output, "Should print disabled message")
 }
 
@@ -73,17 +73,17 @@ func TestHandleVerbose_TogglesMultipleTimes(t *testing.T) {
 	// Toggle on
 	err := handleVerbose(config, []string{})
 	require.NoError(t, err)
-	assert.True(t, config.Verbose)
+	assert.True(t, config.GetVerbose())
 
 	// Toggle off
 	err = handleVerbose(config, []string{})
 	require.NoError(t, err)
-	assert.False(t, config.Verbose)
+	assert.False(t, config.GetVerbose())
 
 	// Toggle on again
 	err = handleVerbose(config, []string{})
 	require.NoError(t, err)
-	assert.True(t, config.Verbose)
+	assert.True(t, config.GetVerbose())
 }
 
 // TestHandleVerbose_IgnoresArguments tests that handleVerbose ignores any arguments
@@ -96,7 +96,7 @@ func TestHandleVerbose_IgnoresArguments(t *testing.T) {
 
 	err := handleVerbose(config, []string{"arg1", "arg2"})
 	require.NoError(t, err)
-	assert.True(t, config.Verbose, "Should toggle regardless of arguments")
+	assert.True(t, config.GetVerbose(), "Should toggle regardless of arguments")
 }
 
 // TestHandleClear_ResetsAllFields tests that handleClear resets all config fields
@@ -112,9 +112,9 @@ func TestHandleClear_ResetsAllFields(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "./...", config.TestPath, "TestPath should be reset to default")
-	assert.False(t, config.Verbose, "Verbose should be reset to false")
-	assert.Equal(t, "", config.RunPattern, "RunPattern should be reset to empty")
+	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should be reset to default")
+	assert.False(t, config.GetVerbose(), "Verbose should be reset to false")
+	assert.Equal(t, "", config.GetRunPattern(), "RunPattern should be reset to empty")
 	assert.Equal(t, "All parameters cleared\n", output, "Should print cleared message")
 }
 
@@ -131,9 +131,9 @@ func TestHandleClear_WorksWithDefaultValues(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "./...", config.TestPath)
-	assert.False(t, config.Verbose)
-	assert.Equal(t, "", config.RunPattern)
+	assert.Equal(t, "./...", config.GetTestPath())
+	assert.False(t, config.GetVerbose())
+	assert.Equal(t, "", config.GetRunPattern())
 	assert.Equal(t, "All parameters cleared\n", output)
 }
 
@@ -147,7 +147,7 @@ func TestHandleClear_IgnoresArguments(t *testing.T) {
 
 	err := handleClear(config, []string{"arg1", "arg2"})
 	require.NoError(t, err)
-	assert.Equal(t, "./...", config.TestPath, "Should reset regardless of arguments")
+	assert.Equal(t, "./...", config.GetTestPath(), "Should reset regardless of arguments")
 }
 
 // TestHandleHelp_DisplaysAllCommands tests that help displays all available commands
@@ -239,16 +239,16 @@ func TestHandleHelp_DoesNotModifyConfig(t *testing.T) {
 		RunPattern: "TestFoo",
 	}
 
-	originalPath := config.TestPath
-	originalVerbose := config.Verbose
-	originalPattern := config.RunPattern
+	originalPath := config.GetTestPath()
+	originalVerbose := config.GetVerbose()
+	originalPattern := config.GetRunPattern()
 
 	err := handleHelp(config, []string{})
 	require.NoError(t, err)
 
-	assert.Equal(t, originalPath, config.TestPath, "TestPath should not change")
-	assert.Equal(t, originalVerbose, config.Verbose, "Verbose should not change")
-	assert.Equal(t, originalPattern, config.RunPattern, "RunPattern should not change")
+	assert.Equal(t, originalPath, config.GetTestPath(), "TestPath should not change")
+	assert.Equal(t, originalVerbose, config.GetVerbose(), "Verbose should not change")
+	assert.Equal(t, originalPattern, config.GetRunPattern(), "RunPattern should not change")
 }
 
 // TestHandleHelp_IgnoresArguments tests that help ignores any arguments
@@ -297,7 +297,7 @@ func TestHandleVerbose_WorksViaRegistry(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.True(t, config.Verbose, "Should toggle verbose via registry")
+	assert.True(t, config.GetVerbose(), "Should toggle verbose via registry")
 	assert.Equal(t, "Verbose: enabled\n", output)
 }
 
@@ -316,9 +316,9 @@ func TestHandleClear_WorksViaRegistry(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "./...", config.TestPath)
-	assert.False(t, config.Verbose)
-	assert.Equal(t, "", config.RunPattern)
+	assert.Equal(t, "./...", config.GetTestPath())
+	assert.False(t, config.GetVerbose())
+	assert.Equal(t, "", config.GetRunPattern())
 	assert.Equal(t, "All parameters cleared\n", output)
 }
 
@@ -357,7 +357,7 @@ func TestHandleRunPattern_WithPattern(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "TestFoo", config.RunPattern, "Should set run pattern")
+	assert.Equal(t, "TestFoo", config.GetRunPattern(), "Should set run pattern")
 	assert.Equal(t, "Run pattern: TestFoo\n", output, "Should print pattern message")
 }
 
@@ -374,7 +374,7 @@ func TestHandleRunPattern_WithoutArgs(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "", config.RunPattern, "Should clear run pattern")
+	assert.Equal(t, "", config.GetRunPattern(), "Should clear run pattern")
 	assert.Equal(t, "Run pattern: cleared\n", output, "Should print cleared message")
 }
 
@@ -391,7 +391,7 @@ func TestHandleRunPattern_WithNilArgs(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "", config.RunPattern, "Should clear run pattern with nil args")
+	assert.Equal(t, "", config.GetRunPattern(), "Should clear run pattern with nil args")
 	assert.Equal(t, "Run pattern: cleared\n", output, "Should print cleared message")
 }
 
@@ -408,7 +408,7 @@ func TestHandleRunPattern_WithMultipleArgs(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "TestFirst", config.RunPattern, "Should use only first argument")
+	assert.Equal(t, "TestFirst", config.GetRunPattern(), "Should use only first argument")
 	assert.Equal(t, "Run pattern: TestFirst\n", output, "Should print first argument")
 }
 
@@ -423,17 +423,17 @@ func TestHandleRunPattern_TogglesMultipleTimes(t *testing.T) {
 	// Set pattern
 	err := handleRunPattern(config, []string{"TestOne"})
 	require.NoError(t, err)
-	assert.Equal(t, "TestOne", config.RunPattern)
+	assert.Equal(t, "TestOne", config.GetRunPattern())
 
 	// Clear pattern
 	err = handleRunPattern(config, []string{})
 	require.NoError(t, err)
-	assert.Equal(t, "", config.RunPattern)
+	assert.Equal(t, "", config.GetRunPattern())
 
 	// Set different pattern
 	err = handleRunPattern(config, []string{"TestTwo"})
 	require.NoError(t, err)
-	assert.Equal(t, "TestTwo", config.RunPattern)
+	assert.Equal(t, "TestTwo", config.GetRunPattern())
 }
 
 // TestHandleTestPath_WithValidDirectory tests setting a valid test path
@@ -452,7 +452,7 @@ func TestHandleTestPath_WithValidDirectory(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, tempDir, config.TestPath, "Should set test path")
+	assert.Equal(t, tempDir, config.GetTestPath(), "Should set test path")
 	assert.Equal(t, "Test path: "+tempDir+"\n", output, "Should print path message")
 }
 
@@ -469,7 +469,7 @@ func TestHandleTestPath_WithCurrentDirectory(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, ".", config.TestPath, "Should set path to current directory")
+	assert.Equal(t, ".", config.GetTestPath(), "Should set path to current directory")
 	assert.Equal(t, "Test path: .\n", output, "Should print path message")
 }
 
@@ -486,7 +486,7 @@ func TestHandleTestPath_WithNoArgs(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "./...", config.TestPath, "TestPath should not change on error")
+	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should not change on error")
 	assert.Equal(t, "Test path: ./...\n", output, "Should print path message")
 }
 
@@ -503,7 +503,7 @@ func TestHandleTestPath_WithNilArgs(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "./...", config.TestPath, "TestPath should not change on error")
+	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should not change on error")
 	assert.Equal(t, "Test path: ./...\n", output, "Should print path message")
 }
 
@@ -519,7 +519,7 @@ func TestHandleTestPath_WithInvalidPath(t *testing.T) {
 
 	require.Error(t, err, "Should return error for invalid path")
 	assert.Contains(t, err.Error(), "path does not exist", "Error should mention path doesn't exist")
-	assert.Equal(t, "./...", config.TestPath, "TestPath should not change on error")
+	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should not change on error")
 }
 
 // TestHandleTestPath_WithFile tests error handling for file path (not directory)
@@ -540,7 +540,7 @@ func TestHandleTestPath_WithFile(t *testing.T) {
 
 	require.Error(t, err, "Should return error for file path")
 	assert.Contains(t, err.Error(), "not a directory", "Error should mention it's not a directory")
-	assert.Equal(t, "./...", config.TestPath, "TestPath should not change on error")
+	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should not change on error")
 }
 
 // TestHandleTestPath_IgnoresExtraArgs tests that only first arg is used
@@ -558,7 +558,7 @@ func TestHandleTestPath_IgnoresExtraArgs(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, tempDir, config.TestPath, "Should use only first argument")
+	assert.Equal(t, tempDir, config.GetTestPath(), "Should use only first argument")
 	assert.Equal(t, "Test path: "+tempDir+"\n", output, "Should print first argument")
 }
 
@@ -586,16 +586,16 @@ func TestHandleCls_DoesNotModifyConfig(t *testing.T) {
 		RunPattern: "TestFoo",
 	}
 
-	originalPath := config.TestPath
-	originalVerbose := config.Verbose
-	originalPattern := config.RunPattern
+	originalPath := config.GetTestPath()
+	originalVerbose := config.GetVerbose()
+	originalPattern := config.GetRunPattern()
 
 	err := handleCls(config, []string{})
 	require.NoError(t, err)
 
-	assert.Equal(t, originalPath, config.TestPath, "TestPath should not change")
-	assert.Equal(t, originalVerbose, config.Verbose, "Verbose should not change")
-	assert.Equal(t, originalPattern, config.RunPattern, "RunPattern should not change")
+	assert.Equal(t, originalPath, config.GetTestPath(), "TestPath should not change")
+	assert.Equal(t, originalVerbose, config.GetVerbose(), "Verbose should not change")
+	assert.Equal(t, originalPattern, config.GetRunPattern(), "RunPattern should not change")
 }
 
 // TestHandleCls_IgnoresArguments tests that cls ignores any arguments
@@ -634,16 +634,16 @@ func TestHandleRun_DoesNotModifyConfig(t *testing.T) {
 		RunPattern: "TestFoo",
 	}
 
-	originalPath := config.TestPath
-	originalVerbose := config.Verbose
-	originalPattern := config.RunPattern
+	originalPath := config.GetTestPath()
+	originalVerbose := config.GetVerbose()
+	originalPattern := config.GetRunPattern()
 
 	err := handleRun(config, []string{})
 	require.NoError(t, err)
 
-	assert.Equal(t, originalPath, config.TestPath, "TestPath should not change")
-	assert.Equal(t, originalVerbose, config.Verbose, "Verbose should not change")
-	assert.Equal(t, originalPattern, config.RunPattern, "RunPattern should not change")
+	assert.Equal(t, originalPath, config.GetTestPath(), "TestPath should not change")
+	assert.Equal(t, originalVerbose, config.GetVerbose(), "Verbose should not change")
+	assert.Equal(t, originalPattern, config.GetRunPattern(), "RunPattern should not change")
 }
 
 // TestHandleRun_IgnoresArguments tests that run ignores any arguments
@@ -691,7 +691,7 @@ func TestHandleRunPattern_WorksViaRegistry(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "TestViaRegistry", config.RunPattern)
+	assert.Equal(t, "TestViaRegistry", config.GetRunPattern())
 	assert.Equal(t, "Run pattern: TestViaRegistry\n", output)
 }
 
@@ -711,7 +711,7 @@ func TestHandleTestPath_WorksViaRegistry(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, tempDir, config.TestPath)
+	assert.Equal(t, tempDir, config.GetTestPath())
 	assert.Equal(t, "Test path: "+tempDir+"\n", output)
 }
 

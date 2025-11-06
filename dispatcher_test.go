@@ -111,7 +111,7 @@ func TestDispatcher_CommandMessageCallsHandler(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 
 	// Verbose should have been toggled
-	assert.True(t, config.Verbose, "verbose command should have been executed")
+	assert.True(t, config.GetVerbose(), "verbose command should have been executed")
 }
 
 // TestDispatcher_CommandMessageSpawnsTestRunner tests that CommandMessage spawns test runner
