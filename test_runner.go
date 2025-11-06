@@ -32,7 +32,6 @@ func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup) {
 	}
 }
 
-//nolint:funlen
 func runTests(
 	ctx context.Context,
 	config *TestConfig,

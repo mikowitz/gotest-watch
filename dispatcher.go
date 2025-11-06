@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+//nolint:funlen
 func dispatcher(
 	ctx context.Context,
 	config *TestConfig,

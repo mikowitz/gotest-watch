@@ -9,7 +9,7 @@ import (
 )
 
 // TestDispatcher_FileChangeSpawnsTestRunner tests that FileChangeMessage spawns test runner
-func TestDispatcher_FileChangeSpawnsTestRunner(t *testing.T) {
+func TestDispatcher_FileChangeSpawnsTestRunner(_ *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -112,12 +112,10 @@ func TestDispatcher_CommandMessageCallsHandler(t *testing.T) {
 
 	// Verbose should have been toggled
 	assert.True(t, config.Verbose, "verbose command should have been executed")
-
-	cancel()
 }
 
 // TestDispatcher_CommandMessageSpawnsTestRunner tests that CommandMessage spawns test runner
-func TestDispatcher_CommandMessageSpawnsTestRunner(t *testing.T) {
+func TestDispatcher_CommandMessageSpawnsTestRunner(_ *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -145,8 +143,6 @@ func TestDispatcher_CommandMessageSpawnsTestRunner(t *testing.T) {
 
 	// Wait for completion to be processed
 	time.Sleep(50 * time.Millisecond)
-
-	cancel()
 }
 
 // TestDispatcher_CommandMessageIgnoredWhenTestRunning tests that CommandMessage ignored when testRunning=true
@@ -187,8 +183,6 @@ func TestDispatcher_CommandMessageIgnoredWhenTestRunning(t *testing.T) {
 
 	// The second command should have been drained and ignored (not in channel anymore)
 	assert.Equal(t, 0, len(commandChan), "second command should have been drained and ignored")
-
-	cancel()
 }
 
 // TestDispatcher_HelpMessageDoesNotSpawnTestRunner tests that HelpMessage doesn't spawn test runner
@@ -217,8 +211,6 @@ func TestDispatcher_HelpMessageDoesNotSpawnTestRunner(t *testing.T) {
 
 	// testCompleteChan should be empty (no test started)
 	assert.Equal(t, 0, len(testCompleteChan), "help command should not start test runner")
-
-	cancel()
 }
 
 // TestDispatcher_TestCompleteMessageUpdatesState tests TestCompleteMessage updates state

@@ -9,7 +9,6 @@ import (
 	"syscall"
 )
 
-//nolint:funlen
 func main() {
 	initRegistry()
 
