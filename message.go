@@ -15,6 +15,7 @@ const (
 	VerboseCmd     Command = "v"
 	SetPathCmd     Command = "p"
 	SetPatternCmd  Command = "r"
+	SetSkipCmd     Command = "s"
 	HelpCmd        Command = "h"
 	ClearCmd       Command = "clear"
 	ClearScreenCmd Command = "cls"

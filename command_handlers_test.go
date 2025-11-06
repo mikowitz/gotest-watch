@@ -746,3 +746,153 @@ func TestHandleRun_WorksViaRegistry(t *testing.T) {
 	err := handleCommand(Command("f"), config, []string{})
 	require.NoError(t, err)
 }
+
+// ============================================================================
+// Step 6: Skip Pattern Command Handler Tests
+// ============================================================================
+
+// TestHandleSkipPattern_WithPattern tests setting a skip pattern
+func TestHandleSkipPattern_WithPattern(t *testing.T) {
+	config := &TestConfig{
+		TestPath:    "./...",
+		Verbose:     false,
+		RunPattern:  "",
+		SkipPattern: "",
+	}
+
+	output := captureStdout(func() {
+		err := handleSkipPattern(config, []string{"TestSkip"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, "TestSkip", config.GetSkipPattern(), "Should set skip pattern")
+	assert.Equal(t, "Skip pattern: TestSkip\n", output, "Should print skip pattern message")
+}
+
+// TestHandleSkipPattern_WithoutArgs tests clearing the skip pattern
+func TestHandleSkipPattern_WithoutArgs(t *testing.T) {
+	config := &TestConfig{
+		TestPath:    "./...",
+		Verbose:     false,
+		RunPattern:  "",
+		SkipPattern: "TestOld",
+	}
+
+	output := captureStdout(func() {
+		err := handleSkipPattern(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, "", config.GetSkipPattern(), "Should clear skip pattern")
+	assert.Equal(t, "Skip pattern: cleared\n", output, "Should print cleared message")
+}
+
+// TestHandleSkipPattern_WithNilArgs tests clearing with nil args
+func TestHandleSkipPattern_WithNilArgs(t *testing.T) {
+	config := &TestConfig{
+		TestPath:    "./...",
+		Verbose:     false,
+		RunPattern:  "",
+		SkipPattern: "TestSomething",
+	}
+
+	output := captureStdout(func() {
+		err := handleSkipPattern(config, nil)
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, "", config.GetSkipPattern(), "Should clear skip pattern with nil args")
+	assert.Equal(t, "Skip pattern: cleared\n", output, "Should print cleared message")
+}
+
+// TestHandleSkipPattern_WithMultipleArgs tests that only first arg is used
+func TestHandleSkipPattern_WithMultipleArgs(t *testing.T) {
+	config := &TestConfig{
+		TestPath:    "./...",
+		Verbose:     false,
+		RunPattern:  "",
+		SkipPattern: "",
+	}
+
+	output := captureStdout(func() {
+		err := handleSkipPattern(config, []string{"TestFirst", "TestSecond", "TestThird"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, "TestFirst", config.GetSkipPattern(), "Should use only first argument")
+	assert.Equal(t, "Skip pattern: TestFirst\n", output, "Should print first argument")
+}
+
+// TestHandleSkipPattern_TogglesMultipleTimes tests setting and clearing multiple times
+func TestHandleSkipPattern_TogglesMultipleTimes(t *testing.T) {
+	config := &TestConfig{
+		TestPath:    "./...",
+		Verbose:     false,
+		RunPattern:  "",
+		SkipPattern: "",
+	}
+
+	// Set pattern
+	err := handleSkipPattern(config, []string{"TestOne"})
+	require.NoError(t, err)
+	assert.Equal(t, "TestOne", config.GetSkipPattern())
+
+	// Clear pattern
+	err = handleSkipPattern(config, []string{})
+	require.NoError(t, err)
+	assert.Equal(t, "", config.GetSkipPattern())
+
+	// Set different pattern
+	err = handleSkipPattern(config, []string{"TestTwo"})
+	require.NoError(t, err)
+	assert.Equal(t, "TestTwo", config.GetSkipPattern())
+}
+
+// TestInitRegistry_RegistersSkipPatternHandler tests that initRegistry registers skip handler
+func TestInitRegistry_RegistersSkipPatternHandler(t *testing.T) {
+	initRegistry()
+
+	_, hasSkipPattern := commandRegistry[Command("s")]
+	assert.True(t, hasSkipPattern, "Should register 's' command")
+}
+
+// TestHandleSkipPattern_WorksViaRegistry tests skip pattern through the registry
+func TestHandleSkipPattern_WorksViaRegistry(t *testing.T) {
+	initRegistry()
+
+	config := &TestConfig{
+		TestPath:    "./...",
+		Verbose:     false,
+		RunPattern:  "",
+		SkipPattern: "",
+	}
+
+	output := captureStdout(func() {
+		err := handleCommand(Command("s"), config, []string{"TestViaRegistry"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, "TestViaRegistry", config.GetSkipPattern())
+	assert.Equal(t, "Skip pattern: TestViaRegistry\n", output)
+}
+
+// TestHandleClear_ResetsSkipPattern tests that clear resets skip pattern too
+func TestHandleClear_ResetsSkipPattern(t *testing.T) {
+	config := &TestConfig{
+		TestPath:    "./custom/path",
+		Verbose:     true,
+		RunPattern:  "TestFoo",
+		SkipPattern: "TestBar",
+	}
+
+	output := captureStdout(func() {
+		err := handleClear(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should be reset to default")
+	assert.False(t, config.GetVerbose(), "Verbose should be reset to false")
+	assert.Equal(t, "", config.GetRunPattern(), "RunPattern should be reset to empty")
+	assert.Equal(t, "", config.GetSkipPattern(), "SkipPattern should be reset to empty")
+	assert.Equal(t, "All parameters cleared\n", output, "Should print cleared message")
+}

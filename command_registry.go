@@ -12,6 +12,7 @@ func initRegistry() {
 	commandRegistry[HelpCmd] = handleHelp
 	commandRegistry[ClearCmd] = handleClear
 	commandRegistry[SetPatternCmd] = handleRunPattern
+	commandRegistry[SetSkipCmd] = handleSkipPattern
 	commandRegistry[SetPathCmd] = handleTestPath
 	commandRegistry[ClearScreenCmd] = handleCls
 	commandRegistry[ForceRunCmd] = handleRun
