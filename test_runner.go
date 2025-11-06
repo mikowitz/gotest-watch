@@ -37,7 +37,6 @@ func runTests(
 	ctx context.Context,
 	config *TestConfig,
 	completeChan chan TestCompleteMessage,
-	readyChan chan bool,
 	stdoutWriter io.Writer,
 	stderrWriter io.Writer,
 ) {
@@ -99,5 +98,4 @@ func runTests(
 	}
 
 	completeChan <- TestCompleteMessage{}
-	readyChan <- true
 }

@@ -34,7 +34,6 @@ func main() {
 	helpChan := make(chan HelpMessage, 10)
 	fileChangeChan := make(chan FileChangeMessage, 10)
 	testCompleteChan := make(chan TestCompleteMessage, 10)
-	readyChan := make(chan bool, 1)
 
 	// Start file watcher in background
 	root, err := os.Getwd()
@@ -45,7 +44,7 @@ func main() {
 	go watchFiles(ctx, root, fileChangeChan)
 
 	// Start stdin reader in background
-	go readStdin(ctx, os.Stdin, cmdChan, helpChan, readyChan)
+	go readStdin(ctx, os.Stdin, cmdChan, helpChan)
 
 	// Create test config for command handlers
 	config := &TestConfig{
@@ -55,5 +54,5 @@ func main() {
 	}
 
 	// Start dispatcher (blocks until context is cancelled)
-	dispatcher(ctx, config, fileChangeChan, cmdChan, helpChan, testCompleteChan, readyChan)
+	dispatcher(ctx, config, fileChangeChan, cmdChan, helpChan, testCompleteChan)
 }

@@ -199,16 +199,12 @@ func TestReadStdin_SendsHelpMessage(t *testing.T) {
 	// Create channels
 	commandChan := make(chan CommandMessage, 10)
 	helpChan := make(chan HelpMessage, 10)
-	readyChan := make(chan bool, 10)
 
 	// Start readStdin with mock stdin
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go readStdin(ctx, mockStdin, commandChan, helpChan, readyChan)
-
-	// Signal ready
-	readyChan <- true
+	go readStdin(ctx, mockStdin, commandChan, helpChan)
 
 	// Wait for message
 	select {
@@ -236,16 +232,12 @@ func TestReadStdin_SendsCommandMessage(t *testing.T) {
 	// Create channels
 	commandChan := make(chan CommandMessage, 10)
 	helpChan := make(chan HelpMessage, 10)
-	readyChan := make(chan bool, 10)
 
 	// Start readStdin with mock stdin
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go readStdin(ctx, mockStdin, commandChan, helpChan, readyChan)
-
-	// Signal ready
-	readyChan <- true
+	go readStdin(ctx, mockStdin, commandChan, helpChan)
 
 	// Wait for message
 	select {
@@ -305,14 +297,11 @@ func TestReadStdin_CommandWithArgs(t *testing.T) {
 
 			commandChan := make(chan CommandMessage, 10)
 			helpChan := make(chan HelpMessage, 10)
-			readyChan := make(chan bool, 10)
 
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			go readStdin(ctx, mockStdin, commandChan, helpChan, readyChan)
-
-			readyChan <- true
+			go readStdin(ctx, mockStdin, commandChan, helpChan)
 
 			select {
 			case msg := <-commandChan:
@@ -333,14 +322,11 @@ func TestReadStdin_IgnoresEmptyLines(t *testing.T) {
 
 	commandChan := make(chan CommandMessage, 10)
 	helpChan := make(chan HelpMessage, 10)
-	readyChan := make(chan bool, 10)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go readStdin(ctx, mockStdin, commandChan, helpChan, readyChan)
-
-	readyChan <- true
+	go readStdin(ctx, mockStdin, commandChan, helpChan)
 
 	// Should only receive one message (the "v" command)
 	select {
@@ -359,119 +345,6 @@ func TestReadStdin_IgnoresEmptyLines(t *testing.T) {
 	}
 }
 
-// TestReadStdin_ReadyChannelBlocking tests that readyChan controls processing
-func TestReadStdin_ReadyChannelBlocking(t *testing.T) {
-	// Create mock stdin with multiple commands
-	input := "v\nclear\n"
-	mockStdin := strings.NewReader(input)
-
-	commandChan := make(chan CommandMessage, 10)
-	helpChan := make(chan HelpMessage, 10)
-	readyChan := make(chan bool, 1) // Buffered to prevent deadlock
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	go readStdin(ctx, mockStdin, commandChan, helpChan, readyChan)
-
-	// Don't send ready signal yet - should not receive any messages
-	select {
-	case <-commandChan:
-		t.Fatal("should not receive message when not ready")
-	case <-time.After(50 * time.Millisecond):
-		// Expected - blocked
-	}
-
-	// Now send ready signal
-	readyChan <- true
-
-	// Should receive first message
-	select {
-	case msg := <-commandChan:
-		assert.Equal(t, Command("v"), msg.Command, "should receive first command")
-	case <-time.After(100 * time.Millisecond):
-		t.Fatal("timeout waiting for first CommandMessage")
-	}
-
-	// Second command should be processed automatically (still ready)
-	select {
-	case msg := <-commandChan:
-		assert.Equal(t, Command("clear"), msg.Command, "should receive second command")
-	case <-time.After(100 * time.Millisecond):
-		t.Fatal("timeout waiting for second CommandMessage")
-	}
-}
-
-// TestReadStdin_ReadyChannelBlocksAndUnblocks tests blocking and unblocking
-func TestReadStdin_ReadyChannelBlocksAndUnblocks(t *testing.T) {
-	// Use a pipe to control when input becomes available
-	pipeReader, pipeWriter := io.Pipe()
-	defer pipeReader.Close()
-	defer pipeWriter.Close()
-
-	commandChan := make(chan CommandMessage, 10)
-	helpChan := make(chan HelpMessage, 10)
-	readyChan := make(chan bool, 1) // Buffered to prevent deadlock
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	go readStdin(ctx, pipeReader, commandChan, helpChan, readyChan)
-
-	// Send true to start processing
-	readyChan <- true
-
-	// Write first command
-	_, _ = pipeWriter.Write([]byte("v\n"))
-
-	// Send false immediately to ensure it's in the buffer before readStdin loops back
-	readyChan <- false
-
-	// Receive first command
-	select {
-	case msg := <-commandChan:
-		assert.Equal(t, Command("v"), msg.Command)
-	case <-time.After(100 * time.Millisecond):
-		t.Fatal("timeout waiting for first command")
-	}
-
-	// Give readStdin time to process the state change and enter blocking state
-	time.Sleep(20 * time.Millisecond)
-
-	// Write second command while blocked (in goroutine because pipe writes block until read)
-	go pipeWriter.Write([]byte("clear\n"))
-
-	// Should not receive second command while blocked
-	select {
-	case <-commandChan:
-		t.Fatal("should not receive command while blocked")
-	case <-time.After(50 * time.Millisecond):
-		// Expected - no message received
-	}
-
-	// Send true to resume processing
-	readyChan <- true
-
-	// Should now receive the second command
-	select {
-	case msg := <-commandChan:
-		assert.Equal(t, Command("clear"), msg.Command)
-	case <-time.After(100 * time.Millisecond):
-		t.Fatal("timeout waiting for second command after unblocking")
-	}
-
-	// Write third command
-	_, _ = pipeWriter.Write([]byte("f\n"))
-
-	// Should receive third command (still unblocked)
-	select {
-	case msg := <-commandChan:
-		assert.Equal(t, Command("f"), msg.Command)
-	case <-time.After(100 * time.Millisecond):
-		t.Fatal("timeout waiting for third command")
-	}
-}
-
 // TestReadStdin_MultipleCommands tests processing multiple commands
 func TestReadStdin_MultipleCommands(t *testing.T) {
 	input := "v\nr TestFoo\np .\nclear\nh\n"
@@ -479,14 +352,11 @@ func TestReadStdin_MultipleCommands(t *testing.T) {
 
 	commandChan := make(chan CommandMessage, 10)
 	helpChan := make(chan HelpMessage, 10)
-	readyChan := make(chan bool, 10)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go readStdin(ctx, mockStdin, commandChan, helpChan, readyChan)
-
-	readyChan <- true
+	go readStdin(ctx, mockStdin, commandChan, helpChan)
 
 	// Should receive 4 CommandMessages
 	expectedCommands := []struct {
@@ -527,13 +397,10 @@ func TestReadStdin_ContextCancellation(t *testing.T) {
 
 	commandChan := make(chan CommandMessage, 10)
 	helpChan := make(chan HelpMessage, 10)
-	readyChan := make(chan bool, 10)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go readStdin(ctx, pipeReader, commandChan, helpChan, readyChan)
-
-	readyChan <- true
+	go readStdin(ctx, pipeReader, commandChan, helpChan)
 
 	// Write a command
 	_, _ = pipeWriter.Write([]byte("v\n"))
