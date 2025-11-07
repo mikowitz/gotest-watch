@@ -5,18 +5,20 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 //nolint:funlen
 func dispatcher(
 	ctx context.Context,
-	config *TestConfig,
 	fileChangeChan chan FileChangeMessage,
 	commandChan chan CommandMessage,
 	helpChan chan HelpMessage,
 	testCompleteChan chan TestCompleteMessage,
 ) {
 	testRunning := false
+
+	config := getConfig(ctx)
 
 	// Show initial prompt
 	fmt.Print("> ")
@@ -70,9 +72,14 @@ func dispatcher(
 				fmt.Print("> ")
 			case <-ctx.Done():
 				// Wait for test to finish before shutting down
-				<-testCompleteChan
-				fmt.Println("Shutting down...")
-				return
+				select {
+				case <-testCompleteChan:
+					fmt.Println("Shutting down...")
+					return
+				case <-time.After(5 * time.Second):
+					fmt.Fprintln(os.Stderr, "Timeout waiting for test to complete, forcing shutdown...")
+					return
+				}
 			}
 		} else {
 			// When idle, process all events

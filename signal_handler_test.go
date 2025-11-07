@@ -81,7 +81,7 @@ func TestSignalHandlerIntegration(t *testing.T) {
 
 	dispatcherDone := make(chan struct{})
 	go func() {
-		dispatcher(ctxWithConfig, config, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		dispatcher(ctxWithConfig, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		close(dispatcherDone)
 	}()
 

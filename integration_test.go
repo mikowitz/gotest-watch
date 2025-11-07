@@ -33,7 +33,7 @@ func TestIntegration_StartSignalShutdown(t *testing.T) {
 	// Start dispatcher
 	dispatcherDone := make(chan struct{})
 	go func() {
-		dispatcher(ctxWithConfig, config, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		dispatcher(ctxWithConfig, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		close(dispatcherDone)
 	}()
 
@@ -81,7 +81,7 @@ func TestIntegration_SignalDuringTestRun(t *testing.T) {
 	// Start dispatcher
 	dispatcherDone := make(chan struct{})
 	go func() {
-		dispatcher(ctxWithConfig, config, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		dispatcher(ctxWithConfig, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		close(dispatcherDone)
 	}()
 

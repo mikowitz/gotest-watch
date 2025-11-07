@@ -14,6 +14,16 @@ func main() {
 	// Create a cancellable context for graceful shutdown
 	ctx, _ := setupSignalHandler()
 
+	// Create test config for command handlers
+	config := &TestConfig{
+		TestPath:   "./...",
+		Verbose:    false,
+		RunPattern: "",
+	}
+
+	// Store config in context
+	ctx = withConfig(ctx, config)
+
 	cmdChan := make(chan CommandMessage, 10)
 	helpChan := make(chan HelpMessage, 10)
 	fileChangeChan := make(chan FileChangeMessage, 10)
@@ -30,13 +40,6 @@ func main() {
 	// Start stdin reader in background
 	go readStdin(ctx, os.Stdin, cmdChan, helpChan)
 
-	// Create test config for command handlers
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
-
 	// Start dispatcher (blocks until context is cancelled)
-	dispatcher(ctx, config, fileChangeChan, cmdChan, helpChan, testCompleteChan)
+	dispatcher(ctx, fileChangeChan, cmdChan, helpChan, testCompleteChan)
 }

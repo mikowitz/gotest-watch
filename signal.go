@@ -15,14 +15,10 @@ func setupSignalHandler() (context.Context, context.CancelFunc) {
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
-		select {
-		case <-sigChan:
-			sig := <-sigChan
-			fmt.Printf("\n\nReceived signal: %v\n", sig)
-			fmt.Println("Shutting down gracefully...")
-			cancel()
-			os.Exit(0)
-		}
+		sig := <-sigChan
+		fmt.Printf("\n\nReceived signal: %v\n", sig)
+		fmt.Println("Shutting down gracefully...")
+		cancel()
 	}()
 
 	return ctx, cancel
