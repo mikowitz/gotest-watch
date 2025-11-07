@@ -35,10 +35,25 @@ func main() {
 		log.Println(err)
 	}
 
-	go watchFiles(ctx, root, fileChangeChan)
+	// For now, start watcher immediately (no blocking)
+	// TODO: Implement proper startup sequence with initial test run
+	startWatching := make(chan struct{})
+	// close(startWatching)
+
+	go watchFiles(ctx, root, fileChangeChan, startWatching)
 
 	// Start stdin reader in background
 	go readStdin(ctx, os.Stdin, cmdChan, helpChan)
+
+	fmt.Println("Running tests...")
+	runTests(ctx, testCompleteChan, nil, nil)
+
+	select {
+	case <-testCompleteChan:
+		close(startWatching)
+	case <-ctx.Done():
+		return
+	}
 
 	// Start dispatcher (blocks until context is cancelled)
 	dispatcher(ctx, fileChangeChan, cmdChan, helpChan, testCompleteChan)

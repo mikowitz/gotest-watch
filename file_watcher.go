@@ -34,7 +34,18 @@ func addWatchRecursive(watcher *fsnotify.Watcher, rootpath string) error {
 	})
 }
 
-func watchFiles(ctx context.Context, dir string, fileChangeChan chan FileChangeMessage) {
+func watchFiles(
+	ctx context.Context,
+	dir string,
+	fileChangeChan chan FileChangeMessage,
+	startWatchingChan chan struct{},
+) {
+	select {
+	case <-startWatchingChan:
+	// Proceed
+	case <-ctx.Done():
+		return
+	}
 	watcher, err := fsnotify.NewWatcher()
 	defer func() {
 		err := watcher.Close()
