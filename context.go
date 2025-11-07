@@ -12,9 +12,9 @@ func withConfig(ctx context.Context, config *TestConfig) context.Context {
 
 func getConfig(ctx context.Context) *TestConfig {
 	if config := ctx.Value(configKey{}); config != nil {
-		switch config.(type) {
+		switch cfg := config.(type) {
 		case *TestConfig:
-			return config.(*TestConfig)
+			return cfg
 		default:
 			return nil
 		}

@@ -34,7 +34,6 @@ func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup) {
 
 func runTests(
 	ctx context.Context,
-	// config *TestConfig,
 	completeChan chan TestCompleteMessage,
 	stdoutWriter io.Writer,
 	stderrWriter io.Writer,
@@ -48,7 +47,6 @@ func runTests(
 	}
 
 	config := getConfig(ctx)
-
 	testCommand := config.BuildCommand()
 	fields := strings.Fields(testCommand)
 
