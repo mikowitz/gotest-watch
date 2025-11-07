@@ -394,7 +394,7 @@
   - [x] Test ready channel receives correct values
 - [x] Run tests: `go test -v`
 - [x] Build and run: `go build && ./gotest-watch`
-- [ ] Manual test: start tool, type commands, save files, verify behavior
+- [x] Manual test: start tool, type commands, save files, verify behavior
 
 ### Step 10: Context & Lifecycle
 

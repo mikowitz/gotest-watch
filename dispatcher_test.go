@@ -10,15 +10,14 @@ import (
 
 // TestDispatcher_FileChangeSpawnsTestRunner tests that FileChangeMessage spawns test runner
 func TestDispatcher_FileChangeSpawnsTestRunner(_ *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	config := &TestConfig{
 		TestPath:   "./...",
 		Verbose:    false,
 		RunPattern: "",
 	}
 
+	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	commandChan := make(chan CommandMessage, 1)
 	helpChan := make(chan HelpMessage, 1)
@@ -44,15 +43,14 @@ func TestDispatcher_FileChangeSpawnsTestRunner(_ *testing.T) {
 
 // TestDispatcher_FileChangeIgnoredWhenTestRunning tests that FileChangeMessage ignored when testRunning=true
 func TestDispatcher_FileChangeIgnoredWhenTestRunning(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	config := &TestConfig{
 		TestPath:   "./...",
 		Verbose:    false,
 		RunPattern: "",
 	}
 
+	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 10)
 	commandChan := make(chan CommandMessage, 1)
 	helpChan := make(chan HelpMessage, 1)
@@ -88,15 +86,14 @@ func TestDispatcher_FileChangeIgnoredWhenTestRunning(t *testing.T) {
 func TestDispatcher_CommandMessageCallsHandler(t *testing.T) {
 	initRegistry()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	config := &TestConfig{
 		TestPath:   "./...",
 		Verbose:    false,
 		RunPattern: "",
 	}
 
+	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	commandChan := make(chan CommandMessage, 1)
 	helpChan := make(chan HelpMessage, 1)
@@ -116,15 +113,14 @@ func TestDispatcher_CommandMessageCallsHandler(t *testing.T) {
 
 // TestDispatcher_CommandMessageSpawnsTestRunner tests that CommandMessage spawns test runner
 func TestDispatcher_CommandMessageSpawnsTestRunner(_ *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	config := &TestConfig{
 		TestPath:   "./...",
 		Verbose:    false,
 		RunPattern: "",
 	}
 
+	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	commandChan := make(chan CommandMessage, 1)
 	helpChan := make(chan HelpMessage, 1)
@@ -147,15 +143,14 @@ func TestDispatcher_CommandMessageSpawnsTestRunner(_ *testing.T) {
 
 // TestDispatcher_CommandMessageIgnoredWhenTestRunning tests that CommandMessage ignored when testRunning=true
 func TestDispatcher_CommandMessageIgnoredWhenTestRunning(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	config := &TestConfig{
 		TestPath:   "./...",
 		Verbose:    false,
 		RunPattern: "",
 	}
 
+	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	commandChan := make(chan CommandMessage, 10)
 	helpChan := make(chan HelpMessage, 1)
@@ -187,15 +182,14 @@ func TestDispatcher_CommandMessageIgnoredWhenTestRunning(t *testing.T) {
 
 // TestDispatcher_HelpMessageDoesNotSpawnTestRunner tests that HelpMessage doesn't spawn test runner
 func TestDispatcher_HelpMessageDoesNotSpawnTestRunner(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	config := &TestConfig{
 		TestPath:   "./...",
 		Verbose:    false,
 		RunPattern: "",
 	}
 
+	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	commandChan := make(chan CommandMessage, 1)
 	helpChan := make(chan HelpMessage, 1)
@@ -215,15 +209,14 @@ func TestDispatcher_HelpMessageDoesNotSpawnTestRunner(t *testing.T) {
 
 // TestDispatcher_TestCompleteMessageUpdatesState tests TestCompleteMessage updates state
 func TestDispatcher_TestCompleteMessageUpdatesState(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	config := &TestConfig{
 		TestPath:   "./...",
 		Verbose:    false,
 		RunPattern: "",
 	}
 
+	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 10)
 	commandChan := make(chan CommandMessage, 1)
 	helpChan := make(chan HelpMessage, 1)
@@ -297,15 +290,14 @@ func TestDispatcher_ContextDoneExitsGracefully(t *testing.T) {
 
 // TestDispatcher_StateTransitions tests state transitions between idle and running
 func TestDispatcher_StateTransitions(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	config := &TestConfig{
 		TestPath:   "./...",
 		Verbose:    false,
 		RunPattern: "",
 	}
 
+	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 10)
 	commandChan := make(chan CommandMessage, 1)
 	helpChan := make(chan HelpMessage, 1)

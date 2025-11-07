@@ -80,7 +80,7 @@ func dispatcher(
 			case <-fileChangeChan:
 				testRunning = true
 				fmt.Println("\nFile change detected, running tests...")
-				go runTests(ctx, config, testCompleteChan, nil, nil)
+				go runTests(ctx, testCompleteChan, nil, nil)
 
 			case cmd := <-commandChan:
 				// Execute command handler
@@ -91,7 +91,7 @@ func dispatcher(
 				// Spawn test runner if command requires it
 				if cmd.Command == ForceRunCmd {
 					testRunning = true
-					go runTests(ctx, config, testCompleteChan, nil, nil)
+					go runTests(ctx, testCompleteChan, nil, nil)
 				} else {
 					// Show prompt after non-test commands
 					fmt.Print("> ")
