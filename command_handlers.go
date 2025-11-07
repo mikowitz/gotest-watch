@@ -33,6 +33,18 @@ func handleRunPattern(config *TestConfig, args []string) error {
 	return nil
 }
 
+func handleSkipPattern(config *TestConfig, args []string) error {
+	if len(args) == 0 {
+		config.SetSkipPattern("")
+		fmt.Println("Skip pattern: cleared")
+		return nil
+	}
+	pattern := args[0]
+	config.SetSkipPattern(pattern)
+	fmt.Printf("Skip pattern: %s\n", pattern)
+	return nil
+}
+
 func handleTestPath(config *TestConfig, args []string) error {
 	var path string
 	if len(args) == 0 {
@@ -69,6 +81,8 @@ func handleHelp(_ *TestConfig, _ []string) error {
 	fmt.Println("  v            Toggle verbose mode (-v flag)")
 	fmt.Println("  r <pattern>  Set test run pattern (-run=<pattern>)")
 	fmt.Println("  r            Clear run pattern")
+	fmt.Println("  s <pattern>  Set test skip pattern (-skip=<pattern>)")
+	fmt.Println("  s            Clear skip pattern")
 	fmt.Println("  p <path>     Set test path (default: ./...")
 	fmt.Println("  p            Set test path to default (./...)")
 	fmt.Println("  clear        Clear all parameters")
