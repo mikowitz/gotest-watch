@@ -5,18 +5,24 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 //nolint:funlen
 func dispatcher(
 	ctx context.Context,
-	config *TestConfig,
 	fileChangeChan chan FileChangeMessage,
 	commandChan chan CommandMessage,
 	helpChan chan HelpMessage,
 	testCompleteChan chan TestCompleteMessage,
 ) {
 	testRunning := false
+
+	config := getConfig(ctx)
+	if config == nil {
+		fmt.Fprintln(os.Stderr, "Error: config not found in context")
+		return
+	}
 
 	// Show initial prompt
 	fmt.Print("> ")
@@ -70,9 +76,14 @@ func dispatcher(
 				fmt.Print("> ")
 			case <-ctx.Done():
 				// Wait for test to finish before shutting down
-				<-testCompleteChan
-				fmt.Println("Shutting down...")
-				return
+				select {
+				case <-testCompleteChan:
+					fmt.Println("Shutting down...")
+					return
+				case <-time.After(5 * time.Second):
+					fmt.Fprintln(os.Stderr, "Timeout waiting for test to complete, forcing shutdown...")
+					return
+				}
 			}
 		} else {
 			// When idle, process all events
@@ -80,7 +91,7 @@ func dispatcher(
 			case <-fileChangeChan:
 				testRunning = true
 				fmt.Println("\nFile change detected, running tests...")
-				go runTests(ctx, config, testCompleteChan, nil, nil)
+				go runTests(ctx, testCompleteChan, nil, nil)
 
 			case cmd := <-commandChan:
 				// Execute command handler
@@ -91,7 +102,7 @@ func dispatcher(
 				// Spawn test runner if command requires it
 				if cmd.Command == ForceRunCmd {
 					testRunning = true
-					go runTests(ctx, config, testCompleteChan, nil, nil)
+					go runTests(ctx, testCompleteChan, nil, nil)
 				} else {
 					// Show prompt after non-test commands
 					fmt.Print("> ")
