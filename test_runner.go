@@ -32,6 +32,7 @@ func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup) {
 	}
 }
 
+//nolint:funlen
 func runTests(
 	ctx context.Context,
 	completeChan chan TestCompleteMessage,
@@ -47,6 +48,10 @@ func runTests(
 	}
 
 	config := getConfig(ctx)
+	if config == nil {
+		fmt.Fprintln(os.Stderr, "Error: config not found in context")
+		return
+	}
 	testCommand := config.BuildCommand()
 	fields := strings.Fields(testCommand)
 

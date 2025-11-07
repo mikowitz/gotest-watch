@@ -19,6 +19,10 @@ func dispatcher(
 	testRunning := false
 
 	config := getConfig(ctx)
+	if config == nil {
+		fmt.Fprintln(os.Stderr, "Error: config not found in context")
+		return
+	}
 
 	// Show initial prompt
 	fmt.Print("> ")
