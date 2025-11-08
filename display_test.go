@@ -22,7 +22,7 @@ func TestDisplayPrompt_OutputFormat(t *testing.T) {
 	displayPrompt()
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	// Read captured output
@@ -48,9 +48,9 @@ func TestDisplayPrompt_DoesNotPanic(t *testing.T) {
 	})
 
 	// Cleanup
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
-	io.Copy(io.Discard, r)
+	_, _ = io.Copy(io.Discard, r)
 }
 
 // TestDisplayCommand_OutputFormat tests that displayCommand prints correct format
@@ -99,7 +99,7 @@ func TestDisplayCommand_OutputFormat(t *testing.T) {
 			displayCommand(tt.args)
 
 			// Restore stdout
-			w.Close()
+			_ = w.Close()
 			os.Stdout = oldStdout
 
 			// Read captured output
@@ -151,9 +151,9 @@ func TestDisplayCommand_DoesNotPanic(t *testing.T) {
 			})
 
 			// Cleanup
-			w.Close()
+			_ = w.Close()
 			os.Stdout = oldStdout
-			io.Copy(io.Discard, r)
+			_, _ = io.Copy(io.Discard, r)
 		})
 	}
 }
@@ -170,7 +170,7 @@ func TestDisplayCommand_JoinsWithSpaces(t *testing.T) {
 	displayCommand([]string{"test", "-v", "-race", "./..."})
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	// Read captured output
@@ -200,16 +200,16 @@ func TestDisplayCommand_PrintsToStdout(t *testing.T) {
 	displayCommand([]string{"test", "./..."})
 
 	// Restore stdout/stderr
-	wOut.Close()
-	wErr.Close()
+	_ = wOut.Close()
+	_ = wErr.Close()
 	os.Stdout = oldStdout
 	os.Stderr = oldStderr
 
 	// Read captured output
 	var bufOut bytes.Buffer
 	var bufErr bytes.Buffer
-	io.Copy(&bufOut, rOut)
-	io.Copy(&bufErr, rErr)
+	_, _ = io.Copy(&bufOut, rOut)
+	_, _ = io.Copy(&bufErr, rErr)
 
 	// Should write to stdout, not stderr
 	assert.NotEmpty(t, bufOut.String(), "should write to stdout")
@@ -234,16 +234,16 @@ func TestDisplayPrompt_PrintsToStdout(t *testing.T) {
 	displayPrompt()
 
 	// Restore stdout/stderr
-	wOut.Close()
-	wErr.Close()
+	_ = wOut.Close()
+	_ = wErr.Close()
 	os.Stdout = oldStdout
 	os.Stderr = oldStderr
 
 	// Read captured output
 	var bufOut bytes.Buffer
 	var bufErr bytes.Buffer
-	io.Copy(&bufOut, rOut)
-	io.Copy(&bufErr, rErr)
+	_, _ = io.Copy(&bufOut, rOut)
+	_, _ = io.Copy(&bufErr, rErr)
 
 	// Should write to stdout, not stderr
 	assert.NotEmpty(t, bufOut.String(), "should write to stdout")
@@ -291,7 +291,7 @@ func TestDisplayCommand_WithRealCommandFormat(t *testing.T) {
 			displayCommand(tt.args)
 
 			// Restore stdout
-			w.Close()
+			_ = w.Close()
 			os.Stdout = oldStdout
 
 			// Read captured output

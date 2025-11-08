@@ -10,6 +10,24 @@ import (
 	"path/filepath"
 )
 
+func getLoggerDest() io.Writer {
+	usr, _ := user.Current()
+	logDir := filepath.Join(usr.HomeDir, ".local/state/gotest-watch")
+	if err := os.MkdirAll(logDir, 0o750); err != nil {
+		fmt.Printf("Could not find directory")
+		return io.Discard
+	}
+	if f, err := os.OpenFile(
+		filepath.Join(filepath.Clean(logDir), "gotest-watch.log"),
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+		0o600,
+	); err != nil {
+		return io.Discard
+	} else {
+		return f
+	}
+}
+
 func main() {
 	initRegistry()
 
@@ -26,18 +44,7 @@ func main() {
 	// Store config in context
 	ctx = withConfig(ctx, config)
 
-	var logDest io.Writer
-	usr, _ := user.Current()
-	logDir := filepath.Join(usr.HomeDir, ".local/state/gotest-watch")
-	os.MkdirAll(logDir, 0o755)
-	if f, err := os.OpenFile(filepath.Join(logDir, "gotest-watch.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644); err != nil {
-		fmt.Printf("could not open /usr/local/log/gotest-watch.log, %v\n", err)
-		logDest = io.Discard
-	} else {
-		logDest = f
-	}
-
-	logger := slog.New(slog.NewTextHandler(logDest, nil))
+	logger := slog.New(slog.NewTextHandler(getLoggerDest(), nil))
 	logger.Log(ctx, slog.LevelInfo, "gotest-watch starting...")
 
 	cmdChan := make(chan CommandMessage, 10)
