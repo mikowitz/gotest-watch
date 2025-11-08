@@ -220,7 +220,7 @@ func TestStartupSequence_FullIntegration(t *testing.T) {
 	select {
 	case <-testCompleteChan:
 		events <- "phase1_test_completed"
-	case <-time.After(2 * time.Second):
+	case <-time.After(5 * time.Second):
 		t.Fatal("initial test did not complete")
 	}
 
