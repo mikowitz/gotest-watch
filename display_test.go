@@ -1,56 +1,30 @@
 package main
 
 import (
-	"bytes"
-	"io"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 // TestDisplayPrompt_OutputFormat tests that displayPrompt prints the correct format
 func TestDisplayPrompt_OutputFormat(t *testing.T) {
-	// Capture stdout
-	oldStdout := os.Stdout
-	r, w, err := os.Pipe()
-	require.NoError(t, err)
-	os.Stdout = w
-
 	// Call the function
-	displayPrompt()
-
-	// Restore stdout
-	_ = w.Close()
-	os.Stdout = oldStdout
-
-	// Read captured output
-	var buf bytes.Buffer
-	_, err = io.Copy(&buf, r)
-	require.NoError(t, err)
+	actual := captureStdout(t, func() {
+		displayPrompt()
+	})
 
 	// Verify exact format: "> "
-	assert.Equal(t, "> ", buf.String())
+	assert.Equal(t, "> ", actual)
 }
 
 // TestDisplayPrompt_DoesNotPanic tests that displayPrompt doesn't panic
 func TestDisplayPrompt_DoesNotPanic(t *testing.T) {
-	// Capture stdout to suppress output
-	oldStdout := os.Stdout
-	r, w, err := os.Pipe()
-	require.NoError(t, err)
-	os.Stdout = w
-
 	// Should not panic
 	assert.NotPanics(t, func() {
-		displayPrompt()
+		captureStdout(t, func() {
+			displayPrompt()
+		})
 	})
-
-	// Cleanup
-	_ = w.Close()
-	os.Stdout = oldStdout
-	_, _ = io.Copy(io.Discard, r)
 }
 
 // TestDisplayCommand_OutputFormat tests that displayCommand prints correct format
@@ -89,26 +63,10 @@ func TestDisplayCommand_OutputFormat(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Capture stdout
-			oldStdout := os.Stdout
-			r, w, err := os.Pipe()
-			require.NoError(t, err)
-			os.Stdout = w
-
-			// Call the function
-			displayCommand(tt.args)
-
-			// Restore stdout
-			_ = w.Close()
-			os.Stdout = oldStdout
-
-			// Read captured output
-			var buf bytes.Buffer
-			_, err = io.Copy(&buf, r)
-			require.NoError(t, err)
-
-			// Verify exact format
-			assert.Equal(t, tt.expected, buf.String())
+			actual := captureStdout(t, func() {
+				displayCommand(tt.args)
+			})
+			assert.Equal(t, tt.expected, actual)
 		})
 	}
 }
@@ -139,115 +97,43 @@ func TestDisplayCommand_DoesNotPanic(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Capture stdout to suppress output
-			oldStdout := os.Stdout
-			r, w, err := os.Pipe()
-			require.NoError(t, err)
-			os.Stdout = w
-
-			// Should not panic
 			assert.NotPanics(t, func() {
-				displayCommand(tt.args)
+				captureStdout(t, func() {
+					displayCommand(tt.args)
+				})
 			})
-
-			// Cleanup
-			_ = w.Close()
-			os.Stdout = oldStdout
-			_, _ = io.Copy(io.Discard, r)
 		})
 	}
 }
 
 // TestDisplayCommand_JoinsWithSpaces tests that displayCommand joins args with spaces
 func TestDisplayCommand_JoinsWithSpaces(t *testing.T) {
-	// Capture stdout
-	oldStdout := os.Stdout
-	r, w, err := os.Pipe()
-	require.NoError(t, err)
-	os.Stdout = w
-
-	// Call with multiple args
-	displayCommand([]string{"test", "-v", "-race", "./..."})
-
-	// Restore stdout
-	_ = w.Close()
-	os.Stdout = oldStdout
-
-	// Read captured output
-	var buf bytes.Buffer
-	_, err = io.Copy(&buf, r)
-	require.NoError(t, err)
+	actual := captureStdout(t, func() {
+		displayCommand([]string{"test", "-v", "-race", "./..."})
+	})
 
 	// Verify spaces between each part
-	assert.Contains(t, buf.String(), "go test -v -race ./...")
+	assert.Contains(t, actual, "go test -v -race ./...")
 }
 
 // TestDisplayCommand_PrintsToStdout tests that displayCommand writes to stdout, not stderr
 func TestDisplayCommand_PrintsToStdout(t *testing.T) {
-	// Capture both stdout and stderr
-	oldStdout := os.Stdout
-	oldStderr := os.Stderr
-
-	rOut, wOut, err := os.Pipe()
-	require.NoError(t, err)
-	rErr, wErr, err := os.Pipe()
-	require.NoError(t, err)
-
-	os.Stdout = wOut
-	os.Stderr = wErr
-
-	// Call the function
-	displayCommand([]string{"test", "./..."})
-
-	// Restore stdout/stderr
-	_ = wOut.Close()
-	_ = wErr.Close()
-	os.Stdout = oldStdout
-	os.Stderr = oldStderr
-
-	// Read captured output
-	var bufOut bytes.Buffer
-	var bufErr bytes.Buffer
-	_, _ = io.Copy(&bufOut, rOut)
-	_, _ = io.Copy(&bufErr, rErr)
+	actual := captureStdout(t, func() {
+		displayCommand([]string{"test", "./..."})
+	})
 
 	// Should write to stdout, not stderr
-	assert.NotEmpty(t, bufOut.String(), "should write to stdout")
-	assert.Empty(t, bufErr.String(), "should not write to stderr")
+	assert.NotEmpty(t, actual, "should write to stdout")
 }
 
 // TestDisplayPrompt_PrintsToStdout tests that displayPrompt writes to stdout, not stderr
 func TestDisplayPrompt_PrintsToStdout(t *testing.T) {
-	// Capture both stdout and stderr
-	oldStdout := os.Stdout
-	oldStderr := os.Stderr
-
-	rOut, wOut, err := os.Pipe()
-	require.NoError(t, err)
-	rErr, wErr, err := os.Pipe()
-	require.NoError(t, err)
-
-	os.Stdout = wOut
-	os.Stderr = wErr
-
-	// Call the function
-	displayPrompt()
-
-	// Restore stdout/stderr
-	_ = wOut.Close()
-	_ = wErr.Close()
-	os.Stdout = oldStdout
-	os.Stderr = oldStderr
-
-	// Read captured output
-	var bufOut bytes.Buffer
-	var bufErr bytes.Buffer
-	_, _ = io.Copy(&bufOut, rOut)
-	_, _ = io.Copy(&bufErr, rErr)
+	actual := captureStdout(t, func() {
+		displayPrompt()
+	})
 
 	// Should write to stdout, not stderr
-	assert.NotEmpty(t, bufOut.String(), "should write to stdout")
-	assert.Empty(t, bufErr.String(), "should not write to stderr")
+	assert.NotEmpty(t, actual, "should write to stdout")
 }
 
 // TestDisplayCommand_WithRealCommandFormat tests displayCommand with realistic command formats
@@ -281,26 +167,12 @@ func TestDisplayCommand_WithRealCommandFormat(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Capture stdout
-			oldStdout := os.Stdout
-			r, w, err := os.Pipe()
-			require.NoError(t, err)
-			os.Stdout = w
-
-			// Call the function
-			displayCommand(tt.args)
-
-			// Restore stdout
-			_ = w.Close()
-			os.Stdout = oldStdout
-
-			// Read captured output
-			var buf bytes.Buffer
-			_, err = io.Copy(&buf, r)
-			require.NoError(t, err)
+			actual := captureStdout(t, func() {
+				displayCommand(tt.args)
+			})
 
 			// Verify output contains expected command
-			assert.Contains(t, buf.String(), tt.contains)
+			assert.Contains(t, actual, tt.contains)
 		})
 	}
 }

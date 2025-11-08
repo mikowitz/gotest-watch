@@ -9,7 +9,7 @@ import (
 )
 
 // TestDispatcher_FileChangeSpawnsTestRunner tests that FileChangeMessage spawns test runner
-func TestDispatcher_FileChangeSpawnsTestRunner(_ *testing.T) {
+func TestDispatcher_FileChangeSpawnsTestRunner(t *testing.T) {
 	config := &TestConfig{
 		TestPath:   "./...",
 		Verbose:    false,
@@ -24,7 +24,11 @@ func TestDispatcher_FileChangeSpawnsTestRunner(_ *testing.T) {
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
 	// Start dispatcher in background
-	go dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+	go func() {
+		captureStdout(t, func() {
+			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		})
+	}()
 
 	// Send file change message
 	fileChangeChan <- FileChangeMessage{}
@@ -56,7 +60,11 @@ func TestDispatcher_FileChangeIgnoredWhenTestRunning(t *testing.T) {
 	helpChan := make(chan HelpMessage, 1)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
-	go dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+	go func() {
+		captureStdout(t, func() {
+			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		})
+	}()
 
 	// Start first test
 	fileChangeChan <- FileChangeMessage{}
@@ -99,7 +107,11 @@ func TestDispatcher_CommandMessageCallsHandler(t *testing.T) {
 	helpChan := make(chan HelpMessage, 1)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
-	go dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+	go func() {
+		captureStdout(t, func() {
+			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		})
+	}()
 
 	// Send verbose command
 	commandChan <- CommandMessage{Command: VerboseCmd, Args: nil}
@@ -112,7 +124,7 @@ func TestDispatcher_CommandMessageCallsHandler(t *testing.T) {
 }
 
 // TestDispatcher_CommandMessageSpawnsTestRunner tests that CommandMessage spawns test runner
-func TestDispatcher_CommandMessageSpawnsTestRunner(_ *testing.T) {
+func TestDispatcher_CommandMessageSpawnsTestRunner(t *testing.T) {
 	config := &TestConfig{
 		TestPath:   "./...",
 		Verbose:    false,
@@ -126,7 +138,11 @@ func TestDispatcher_CommandMessageSpawnsTestRunner(_ *testing.T) {
 	helpChan := make(chan HelpMessage, 1)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
-	go dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+	go func() {
+		captureStdout(t, func() {
+			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		})
+	}()
 
 	// Send force run command
 	commandChan <- CommandMessage{Command: ForceRunCmd, Args: nil}
@@ -156,7 +172,11 @@ func TestDispatcher_CommandMessageIgnoredWhenTestRunning(t *testing.T) {
 	helpChan := make(chan HelpMessage, 1)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
-	go dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+	go func() {
+		captureStdout(t, func() {
+			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		})
+	}()
 
 	// Start first test
 	commandChan <- CommandMessage{Command: ForceRunCmd, Args: nil}
@@ -195,7 +215,11 @@ func TestDispatcher_HelpMessageDoesNotSpawnTestRunner(t *testing.T) {
 	helpChan := make(chan HelpMessage, 1)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
-	go dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+	go func() {
+		captureStdout(t, func() {
+			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		})
+	}()
 
 	// Send help message
 	helpChan <- HelpMessage{}
@@ -222,7 +246,11 @@ func TestDispatcher_TestCompleteMessageUpdatesState(t *testing.T) {
 	helpChan := make(chan HelpMessage, 1)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
-	go dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+	go func() {
+		captureStdout(t, func() {
+			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		})
+	}()
 
 	// Start a test
 	fileChangeChan <- FileChangeMessage{}
@@ -269,7 +297,9 @@ func TestDispatcher_ContextDoneExitsGracefully(t *testing.T) {
 
 	done := make(chan struct{})
 	go func() {
-		dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		captureStdout(t, func() {
+			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		})
 		close(done)
 	}()
 
@@ -303,7 +333,11 @@ func TestDispatcher_StateTransitions(t *testing.T) {
 	helpChan := make(chan HelpMessage, 1)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
-	go dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+	go func() {
+		captureStdout(t, func() {
+			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		})
+	}()
 
 	// Start test
 	fileChangeChan <- FileChangeMessage{}

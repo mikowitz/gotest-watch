@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,22 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// captureStdout captures stdout during test execution
-func captureStdout(f func()) string {
-	old := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	f()
-
-	_ = w.Close()
-	os.Stdout = old
-
-	var buf bytes.Buffer
-	_, _ = io.Copy(&buf, r)
-	return buf.String()
-}
-
 // TestHandleVerbose_TogglesFromFalseToTrue tests verbose toggle from false to true
 func TestHandleVerbose_TogglesFromFalseToTrue(t *testing.T) {
 	config := &TestConfig{
@@ -36,7 +18,7 @@ func TestHandleVerbose_TogglesFromFalseToTrue(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleVerbose(config, []string{})
 		require.NoError(t, err)
 	})
@@ -53,7 +35,7 @@ func TestHandleVerbose_TogglesFromTrueToFalse(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleVerbose(config, []string{})
 		require.NoError(t, err)
 	})
@@ -107,7 +89,7 @@ func TestHandleClear_ResetsAllFields(t *testing.T) {
 		RunPattern: "TestFoo",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleClear(config, []string{})
 		require.NoError(t, err)
 	})
@@ -126,7 +108,7 @@ func TestHandleClear_WorksWithDefaultValues(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleClear(config, []string{})
 		require.NoError(t, err)
 	})
@@ -158,7 +140,7 @@ func TestHandleHelp_DisplaysAllCommands(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleHelp(config, []string{})
 		require.NoError(t, err)
 	})
@@ -207,7 +189,7 @@ func TestHandleHelp_FormattingIsCorrect(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleHelp(config, []string{})
 		require.NoError(t, err)
 	})
@@ -259,7 +241,7 @@ func TestHandleHelp_IgnoresArguments(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleHelp(config, []string{"arg1", "arg2"})
 		require.NoError(t, err)
 	})
@@ -292,7 +274,7 @@ func TestHandleVerbose_WorksViaRegistry(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleCommand(Command("v"), config, []string{})
 		require.NoError(t, err)
 	})
@@ -311,7 +293,7 @@ func TestHandleClear_WorksViaRegistry(t *testing.T) {
 		RunPattern: "TestFoo",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleCommand(Command("clear"), config, []string{})
 		require.NoError(t, err)
 	})
@@ -332,7 +314,7 @@ func TestHandleHelp_WorksViaRegistry(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleCommand(Command("h"), config, []string{})
 		require.NoError(t, err)
 	})
@@ -352,7 +334,7 @@ func TestHandleRunPattern_WithPattern(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleRunPattern(config, []string{"TestFoo"})
 		require.NoError(t, err)
 	})
@@ -369,7 +351,7 @@ func TestHandleRunPattern_WithoutArgs(t *testing.T) {
 		RunPattern: "TestBar",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleRunPattern(config, []string{})
 		require.NoError(t, err)
 	})
@@ -386,7 +368,7 @@ func TestHandleRunPattern_WithNilArgs(t *testing.T) {
 		RunPattern: "TestBaz",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleRunPattern(config, nil)
 		require.NoError(t, err)
 	})
@@ -403,7 +385,7 @@ func TestHandleRunPattern_WithMultipleArgs(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleRunPattern(config, []string{"TestFirst", "TestSecond", "TestThird"})
 		require.NoError(t, err)
 	})
@@ -447,7 +429,7 @@ func TestHandleTestPath_WithValidDirectory(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleTestPath(config, []string{tempDir})
 		require.NoError(t, err)
 	})
@@ -464,7 +446,7 @@ func TestHandleTestPath_WithCurrentDirectory(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleTestPath(config, []string{"."})
 		require.NoError(t, err)
 	})
@@ -481,7 +463,7 @@ func TestHandleTestPath_WithNoArgs(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleTestPath(config, []string{})
 		require.NoError(t, err)
 	})
@@ -498,7 +480,7 @@ func TestHandleTestPath_WithNilArgs(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleTestPath(config, nil)
 		require.NoError(t, err)
 	})
@@ -553,7 +535,7 @@ func TestHandleTestPath_IgnoresExtraArgs(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleTestPath(config, []string{tempDir, "extra", "args"})
 		require.NoError(t, err)
 	})
@@ -570,7 +552,7 @@ func TestHandleCls_PrintsAnsiEscapeSequence(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleCls(config, []string{})
 		require.NoError(t, err)
 	})
@@ -606,7 +588,7 @@ func TestHandleCls_IgnoresArguments(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleCls(config, []string{"arg1", "arg2"})
 		require.NoError(t, err)
 	})
@@ -686,7 +668,7 @@ func TestHandleRunPattern_WorksViaRegistry(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleCommand(Command("r"), config, []string{"TestViaRegistry"})
 		require.NoError(t, err)
 	})
@@ -706,7 +688,7 @@ func TestHandleTestPath_WorksViaRegistry(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleCommand(Command("p"), config, []string{tempDir})
 		require.NoError(t, err)
 	})
@@ -725,7 +707,7 @@ func TestHandleCls_WorksViaRegistry(t *testing.T) {
 		RunPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleCommand(Command("cls"), config, []string{})
 		require.NoError(t, err)
 	})
@@ -760,7 +742,7 @@ func TestHandleSkipPattern_WithPattern(t *testing.T) {
 		SkipPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleSkipPattern(config, []string{"TestSkip"})
 		require.NoError(t, err)
 	})
@@ -778,7 +760,7 @@ func TestHandleSkipPattern_WithoutArgs(t *testing.T) {
 		SkipPattern: "TestOld",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleSkipPattern(config, []string{})
 		require.NoError(t, err)
 	})
@@ -796,7 +778,7 @@ func TestHandleSkipPattern_WithNilArgs(t *testing.T) {
 		SkipPattern: "TestSomething",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleSkipPattern(config, nil)
 		require.NoError(t, err)
 	})
@@ -814,7 +796,7 @@ func TestHandleSkipPattern_WithMultipleArgs(t *testing.T) {
 		SkipPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleSkipPattern(config, []string{"TestFirst", "TestSecond", "TestThird"})
 		require.NoError(t, err)
 	})
@@ -867,7 +849,7 @@ func TestHandleSkipPattern_WorksViaRegistry(t *testing.T) {
 		SkipPattern: "",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleCommand(Command("s"), config, []string{"TestViaRegistry"})
 		require.NoError(t, err)
 	})
@@ -885,7 +867,7 @@ func TestHandleClear_ResetsSkipPattern(t *testing.T) {
 		SkipPattern: "TestBar",
 	}
 
-	output := captureStdout(func() {
+	output := captureStdout(t, func() {
 		err := handleClear(config, []string{})
 		require.NoError(t, err)
 	})
