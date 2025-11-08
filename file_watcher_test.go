@@ -278,9 +278,11 @@ func TestWatchFiles_DetectsGoFileCreation(t *testing.T) {
 	defer cancel()
 
 	fileChangeChan := make(chan FileChangeMessage, 10)
+	startWatching := make(chan struct{})
+	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan)
+	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -311,9 +313,11 @@ func TestWatchFiles_DetectsGoFileModification(t *testing.T) {
 	defer cancel()
 
 	fileChangeChan := make(chan FileChangeMessage, 10)
+	startWatching := make(chan struct{})
+	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan)
+	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -339,9 +343,11 @@ func TestWatchFiles_IgnoresNonGoFiles(t *testing.T) {
 	defer cancel()
 
 	fileChangeChan := make(chan FileChangeMessage, 10)
+	startWatching := make(chan struct{})
+	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan)
+	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -369,9 +375,11 @@ func TestWatchFiles_DebounceMultipleChanges(t *testing.T) {
 	defer cancel()
 
 	fileChangeChan := make(chan FileChangeMessage, 10)
+	startWatching := make(chan struct{})
+	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan)
+	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -410,9 +418,11 @@ func TestWatchFiles_TimerResetOnSubsequentChanges(t *testing.T) {
 	defer cancel()
 
 	fileChangeChan := make(chan FileChangeMessage, 10)
+	startWatching := make(chan struct{})
+	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan)
+	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -457,9 +467,11 @@ func TestWatchFiles_HandlesNestedDirectories(t *testing.T) {
 	defer cancel()
 
 	fileChangeChan := make(chan FileChangeMessage, 10)
+	startWatching := make(chan struct{})
+	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan)
+	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -490,9 +502,11 @@ func TestWatchFiles_IgnoresHiddenDirectories(t *testing.T) {
 	defer cancel()
 
 	fileChangeChan := make(chan FileChangeMessage, 10)
+	startWatching := make(chan struct{})
+	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan)
+	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -517,11 +531,13 @@ func TestWatchFiles_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	fileChangeChan := make(chan FileChangeMessage, 10)
+	startWatching := make(chan struct{})
+	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
 	watcherDone := make(chan struct{})
 	go func() {
-		watchFiles(ctx, tempDir, fileChangeChan)
+		watchFiles(ctx, tempDir, fileChangeChan, startWatching)
 		close(watcherDone)
 	}()
 
@@ -572,9 +588,11 @@ func TestWatchFiles_MultipleFileTypes(t *testing.T) {
 	defer cancel()
 
 	fileChangeChan := make(chan FileChangeMessage, 10)
+	startWatching := make(chan struct{})
+	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan)
+	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -619,9 +637,11 @@ func TestWatchFiles_FileRemoval(t *testing.T) {
 	defer cancel()
 
 	fileChangeChan := make(chan FileChangeMessage, 10)
+	startWatching := make(chan struct{})
+	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan)
+	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)

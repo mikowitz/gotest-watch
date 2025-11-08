@@ -456,7 +456,7 @@
 
 ### Step 11: Startup Behavior
 
-- [ ] Update watchFiles() signature
+- [x] Update watchFiles() signature
   - [ ] Add startWatching <-chan struct{} parameter
   - [ ] At start of function: block on <-startWatching
   - [ ] Then proceed with normal watching logic
@@ -477,15 +477,15 @@
   - [ ] Start readStdin goroutine
   - [ ] Close startWatching channel (unblocks watcher)
   - [ ] Call dispatcher
-- [ ] Write tests:
+- [x] Write tests:
   - [ ] Test watcher blocks until startWatching closes
   - [ ] Test initial test runs before watcher starts
   - [ ] Test watcher doesn't send messages during initial test
   - [ ] Test prompt appears after initial test
   - [ ] Integration test of full startup sequence
-- [ ] Run tests: `go test -v`
-- [ ] Build and run: `go build && ./gotest-watch`
-- [ ] Manual test: verify initial test runs, then prompt appears
+- [x] Run tests: `go test -v`
+- [x] Build and run: `go build && ./gotest-watch`
+- [x] Manual test: verify initial test runs, then prompt appears
 
 ## Phase 4: Polish
 
