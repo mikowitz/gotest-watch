@@ -55,6 +55,8 @@ func runTests(
 	testCommand := config.BuildCommand()
 	fields := strings.Fields(testCommand)
 
+	displayCommand(fields[1:])
+
 	// Use CommandContext to support cancellation via context
 	//nolint:gosec // TODO: sanitize input
 	cmd := exec.CommandContext(ctx, "go", fields[1:]...)

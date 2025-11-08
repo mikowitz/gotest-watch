@@ -2,14 +2,16 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"log/slog"
 	"os"
+	"os/user"
+	"path/filepath"
 )
 
 func main() {
 	initRegistry()
-
-	fmt.Println("gotest-watch started")
 
 	// Create a cancellable context for graceful shutdown
 	ctx, _ := setupSignalHandler()
@@ -24,6 +26,20 @@ func main() {
 	// Store config in context
 	ctx = withConfig(ctx, config)
 
+	var logDest io.Writer
+	usr, _ := user.Current()
+	logDir := filepath.Join(usr.HomeDir, ".local/state/gotest-watch")
+	os.MkdirAll(logDir, 0o755)
+	if f, err := os.OpenFile(filepath.Join(logDir, "gotest-watch.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644); err != nil {
+		fmt.Printf("could not open /usr/local/log/gotest-watch.log, %v\n", err)
+		logDest = io.Discard
+	} else {
+		logDest = f
+	}
+
+	logger := slog.New(slog.NewTextHandler(logDest, nil))
+	logger.Log(ctx, slog.LevelInfo, "gotest-watch starting...")
+
 	cmdChan := make(chan CommandMessage, 10)
 	helpChan := make(chan HelpMessage, 10)
 	fileChangeChan := make(chan FileChangeMessage, 10)
@@ -35,10 +51,7 @@ func main() {
 		log.Println(err)
 	}
 
-	// For now, start watcher immediately (no blocking)
-	// TODO: Implement proper startup sequence with initial test run
 	startWatching := make(chan struct{})
-	// close(startWatching)
 
 	go watchFiles(ctx, root, fileChangeChan, startWatching)
 
