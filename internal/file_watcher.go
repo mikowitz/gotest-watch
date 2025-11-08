@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -34,7 +34,7 @@ func addWatchRecursive(watcher *fsnotify.Watcher, rootpath string) error {
 	})
 }
 
-func watchFiles(
+func WatchFiles(
 	ctx context.Context,
 	dir string,
 	fileChangeChan chan FileChangeMessage,

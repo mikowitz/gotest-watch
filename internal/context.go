@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 type configKey struct{}
 
-func withConfig(ctx context.Context, config *TestConfig) context.Context {
+func WithConfig(ctx context.Context, config *TestConfig) context.Context {
 	return context.WithValue(ctx, configKey{}, config)
 }
 

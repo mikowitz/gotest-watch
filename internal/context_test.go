@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestWithConfig_StoresConfigInContext tests that withConfig stores config in context
+// TestWithConfig_StoresConfigInContext tests that WithConfig stores config in context
 func TestWithConfig_StoresConfigInContext(t *testing.T) {
 	config := &TestConfig{
 		TestPath:    "./test",
@@ -18,7 +18,7 @@ func TestWithConfig_StoresConfigInContext(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	ctxWithConfig := withConfig(ctx, config)
+	ctxWithConfig := WithConfig(ctx, config)
 
 	// Verify context is not nil
 	require.NotNil(t, ctxWithConfig, "context should not be nil")
@@ -41,7 +41,7 @@ func TestGetConfig_RetrievesConfigFromContext(t *testing.T) {
 	config.SetVerbose(true)
 	config.SetRunPattern("TestExample")
 
-	ctx := withConfig(context.Background(), config)
+	ctx := WithConfig(context.Background(), config)
 	retrieved := getConfig(ctx)
 
 	require.NotNil(t, retrieved, "retrieved config should not be nil")
@@ -67,13 +67,13 @@ func TestGetConfig_ReturnsNilForWrongValueType(t *testing.T) {
 	assert.Nil(t, retrieved, "should return nil when value is wrong type")
 }
 
-// TestWithConfig_PreservesParentContext tests that withConfig preserves parent context
+// TestWithConfig_PreservesParentContext tests that WithConfig preserves parent context
 func TestWithConfig_PreservesParentContext(t *testing.T) {
 	type testKey struct{}
 	parentCtx := context.WithValue(context.Background(), testKey{}, "parent value")
 
 	config := NewTestConfig()
-	ctxWithConfig := withConfig(parentCtx, config)
+	ctxWithConfig := WithConfig(parentCtx, config)
 
 	// Should still be able to get parent value
 	parentValue := ctxWithConfig.Value(testKey{})
@@ -84,7 +84,7 @@ func TestWithConfig_PreservesParentContext(t *testing.T) {
 	assert.Equal(t, config, retrievedConfig, "should have config value")
 }
 
-// TestWithConfig_CanBeChained tests that multiple withConfig calls can be chained
+// TestWithConfig_CanBeChained tests that multiple WithConfig calls can be chained
 func TestWithConfig_CanBeChained(t *testing.T) {
 	config1 := NewTestConfig()
 	config1.SetVerbose(true)
@@ -93,8 +93,8 @@ func TestWithConfig_CanBeChained(t *testing.T) {
 	config2.SetVerbose(false)
 	config2.SetRunPattern("TestNew")
 
-	ctx1 := withConfig(context.Background(), config1)
-	ctx2 := withConfig(ctx1, config2)
+	ctx1 := WithConfig(context.Background(), config1)
+	ctx2 := WithConfig(ctx1, config2)
 
 	// The second config should override the first
 	retrieved := getConfig(ctx2)

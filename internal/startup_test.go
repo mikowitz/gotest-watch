@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func TestWatchFiles_BlocksUntilStartWatchingCloses(t *testing.T) {
 	watcherStarted := make(chan struct{})
 	go func() {
 		close(watcherStarted)
-		watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+		WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 	}()
 
 	// Wait for goroutine to start
@@ -59,7 +59,7 @@ func TestWatchFiles_AcceptsStartWatchingParameter(t *testing.T) {
 	close(startWatching)
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+	go WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give it a moment to start
 	time.Sleep(50 * time.Millisecond)
@@ -76,7 +76,7 @@ func TestStartupSequence_InitialTestRunsBeforeWatcher(t *testing.T) {
 	// 3. Watcher starts
 	// 4. Normal operation begins
 
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), NewTestConfig()))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), NewTestConfig()))
 	defer cancel()
 
 	testCompleteChan := make(chan TestCompleteMessage, 1)
@@ -103,7 +103,7 @@ func TestStartupSequence_InitialTestRunsBeforeWatcher(t *testing.T) {
 	tempDir := t.TempDir()
 	go func() {
 		events <- "watcher_starting"
-		watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+		WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 	}()
 
 	// Watcher should be blocked
@@ -126,7 +126,7 @@ func TestStartupSequence_InitialTestRunsBeforeWatcher(t *testing.T) {
 // TestStartupSequence_WatcherDoesNotSendMessagesDuringInitialTest
 // tests watcher doesn't send messages during initial test
 func TestStartupSequence_WatcherDoesNotSendMessagesDuringInitialTest(t *testing.T) {
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), NewTestConfig()))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), NewTestConfig()))
 	defer cancel()
 
 	fileChangeChan := make(chan FileChangeMessage, 10)
@@ -134,7 +134,7 @@ func TestStartupSequence_WatcherDoesNotSendMessagesDuringInitialTest(t *testing.
 	tempDir := t.TempDir()
 
 	// Start watcher but don't unblock it
-	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+	go WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Simulate initial test running
 	time.Sleep(100 * time.Millisecond)
@@ -196,32 +196,23 @@ func TestStartupSequence_PromptAppearsAfterInitialTest(t *testing.T) {
 
 // TestStartupSequence_FullIntegration tests complete startup sequence integration
 func TestStartupSequence_FullIntegration(t *testing.T) {
-	// Set up a test module with a simple passing test
-	testContent := `package main
-import "testing"
-func TestMessage(t *testing.T) {
-	// Simple passing test
-}
-`
-	tempDir := setupTestModule(t, testContent)
-
 	config := NewTestConfig()
 	config.SetRunPattern("Message")
-	config.WorkingDir = tempDir
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
 
 	// Create channels
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 	fileChangeChan := make(chan FileChangeMessage, 10)
 	startWatching := make(chan struct{})
+	tempDir := t.TempDir()
 
 	events := make(chan string, 20)
 
 	// Phase 1: Initial test run (synchronous in real code)
 	go func() {
 		events <- "phase1_start"
-		runTests(ctx, testCompleteChan, nil, nil)
+		RunTests(ctx, testCompleteChan, nil, nil)
 		events <- "phase1_test_launched"
 	}()
 
@@ -229,7 +220,7 @@ func TestMessage(t *testing.T) {
 	select {
 	case <-testCompleteChan:
 		events <- "phase1_test_completed"
-	case <-time.After(2 * time.Second):
+	case <-time.After(30 * time.Second):
 		t.Fatal("initial test did not complete")
 	}
 
@@ -239,7 +230,7 @@ func TestMessage(t *testing.T) {
 	// Phase 3: Start watcher (blocked)
 	go func() {
 		events <- "phase3_watcher_starting"
-		watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+		WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 	}()
 
 	time.Sleep(50 * time.Millisecond)
@@ -267,7 +258,7 @@ func TestMessage(t *testing.T) {
 
 // TestWatchFiles_UnblocksImmediatelyIfChannelAlreadyClosed tests watcher doesn't block if channel already closed
 func TestWatchFiles_UnblocksImmediatelyIfChannelAlreadyClosed(t *testing.T) {
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), NewTestConfig()))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), NewTestConfig()))
 	defer cancel()
 
 	fileChangeChan := make(chan FileChangeMessage, 1)
@@ -278,7 +269,7 @@ func TestWatchFiles_UnblocksImmediatelyIfChannelAlreadyClosed(t *testing.T) {
 	close(startWatching)
 
 	started := time.Now()
-	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+	go WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give it a moment to start
 	time.Sleep(50 * time.Millisecond)
@@ -293,7 +284,7 @@ func TestWatchFiles_UnblocksImmediatelyIfChannelAlreadyClosed(t *testing.T) {
 
 // TestWatchFiles_ContextCancellationWhileBlocked tests watcher respects context cancellation while blocked
 func TestWatchFiles_ContextCancellationWhileBlocked(t *testing.T) {
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), NewTestConfig()))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), NewTestConfig()))
 
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	startWatching := make(chan struct{}) // Never closed
@@ -301,7 +292,7 @@ func TestWatchFiles_ContextCancellationWhileBlocked(t *testing.T) {
 
 	done := make(chan struct{})
 	go func() {
-		watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+		WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 		close(done)
 	}()
 

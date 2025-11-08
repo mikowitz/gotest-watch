@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"bufio"
@@ -23,7 +23,7 @@ func parseCommand(input string) (Command, []string) {
 // readStdin reads commands from stdin and sends them to the appropriate channels.
 // It runs continuously in a goroutine, and the dispatcher decides whether to
 // process or ignore commands based on whether tests are running.
-func readStdin(
+func ReadStdin(
 	ctx context.Context,
 	r io.Reader,
 	cmdChan chan CommandMessage,

@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"github.com/mikowitz/gotest-watch/internal"
 )
 
 func getLoggerDest() io.Writer {
@@ -29,28 +31,28 @@ func getLoggerDest() io.Writer {
 }
 
 func main() {
-	initRegistry()
+	internal.InitRegistry()
 
 	// Create a cancellable context for graceful shutdown
-	ctx, _ := setupSignalHandler()
+	ctx, _ := internal.SetupSignalHandler()
 
 	// Create test config for command handlers
-	config := &TestConfig{
+	config := &internal.TestConfig{
 		TestPath:   "./...",
 		Verbose:    false,
 		RunPattern: "",
 	}
 
 	// Store config in context
-	ctx = withConfig(ctx, config)
+	ctx = internal.WithConfig(ctx, config)
 
 	logger := slog.New(slog.NewTextHandler(getLoggerDest(), nil))
 	logger.Log(ctx, slog.LevelInfo, "gotest-watch starting...")
 
-	cmdChan := make(chan CommandMessage, 10)
-	helpChan := make(chan HelpMessage, 10)
-	fileChangeChan := make(chan FileChangeMessage, 10)
-	testCompleteChan := make(chan TestCompleteMessage, 10)
+	cmdChan := make(chan internal.CommandMessage, 10)
+	helpChan := make(chan internal.HelpMessage, 10)
+	fileChangeChan := make(chan internal.FileChangeMessage, 10)
+	testCompleteChan := make(chan internal.TestCompleteMessage, 10)
 
 	// Start file watcher in background
 	root, err := os.Getwd()
@@ -60,13 +62,13 @@ func main() {
 
 	startWatching := make(chan struct{})
 
-	go watchFiles(ctx, root, fileChangeChan, startWatching)
+	go internal.WatchFiles(ctx, root, fileChangeChan, startWatching)
 
 	// Start stdin reader in background
-	go readStdin(ctx, os.Stdin, cmdChan, helpChan)
+	go internal.ReadStdin(ctx, os.Stdin, cmdChan, helpChan)
 
 	fmt.Println("Running tests...")
-	runTests(ctx, testCompleteChan, nil, nil)
+	internal.RunTests(ctx, testCompleteChan, nil, nil)
 
 	select {
 	case <-testCompleteChan:
@@ -76,5 +78,5 @@ func main() {
 	}
 
 	// Start dispatcher (blocks until context is cancelled)
-	dispatcher(ctx, fileChangeChan, cmdChan, helpChan, testCompleteChan)
+	internal.Dispatcher(ctx, fileChangeChan, cmdChan, helpChan, testCompleteChan)
 }

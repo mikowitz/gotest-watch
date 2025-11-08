@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -204,7 +204,7 @@ func TestReadStdin_SendsHelpMessage(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go readStdin(ctx, mockStdin, commandChan, helpChan)
+	go ReadStdin(ctx, mockStdin, commandChan, helpChan)
 
 	// Wait for message
 	select {
@@ -237,7 +237,7 @@ func TestReadStdin_SendsCommandMessage(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go readStdin(ctx, mockStdin, commandChan, helpChan)
+	go ReadStdin(ctx, mockStdin, commandChan, helpChan)
 
 	// Wait for message
 	select {
@@ -301,7 +301,7 @@ func TestReadStdin_CommandWithArgs(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			go readStdin(ctx, mockStdin, commandChan, helpChan)
+			go ReadStdin(ctx, mockStdin, commandChan, helpChan)
 
 			select {
 			case msg := <-commandChan:
@@ -326,7 +326,7 @@ func TestReadStdin_IgnoresEmptyLines(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go readStdin(ctx, mockStdin, commandChan, helpChan)
+	go ReadStdin(ctx, mockStdin, commandChan, helpChan)
 
 	// Should only receive one message (the "v" command)
 	select {
@@ -356,7 +356,7 @@ func TestReadStdin_MultipleCommands(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go readStdin(ctx, mockStdin, commandChan, helpChan)
+	go ReadStdin(ctx, mockStdin, commandChan, helpChan)
 
 	// Should receive 4 CommandMessages
 	expectedCommands := []struct {
@@ -400,7 +400,7 @@ func TestReadStdin_ContextCancellation(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go readStdin(ctx, pipeReader, commandChan, helpChan)
+	go ReadStdin(ctx, pipeReader, commandChan, helpChan)
 
 	// Write a command
 	_, _ = pipeWriter.Write([]byte("v\n"))

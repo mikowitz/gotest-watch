@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"testing"
@@ -72,7 +72,7 @@ func TestSignalHandlerIntegration(t *testing.T) {
 	}
 
 	ctx, cancel := setupSignalHandler()
-	ctxWithConfig := withConfig(ctx, config)
+	ctxWithConfig := WithConfig(ctx, config)
 
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	commandChan := make(chan CommandMessage, 1)
@@ -81,7 +81,7 @@ func TestSignalHandlerIntegration(t *testing.T) {
 
 	dispatcherDone := make(chan struct{})
 	go func() {
-		dispatcher(ctxWithConfig, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		Dispatcher(ctxWithConfig, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		close(dispatcherDone)
 	}()
 

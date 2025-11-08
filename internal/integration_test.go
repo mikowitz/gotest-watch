@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -22,7 +22,7 @@ func TestIntegration_StartSignalShutdown(t *testing.T) {
 	config := NewTestConfig()
 
 	// Store config in context
-	ctxWithConfig := withConfig(ctx, config)
+	ctxWithConfig := WithConfig(ctx, config)
 
 	// Create channels
 	fileChangeChan := make(chan FileChangeMessage, 1)
@@ -33,7 +33,7 @@ func TestIntegration_StartSignalShutdown(t *testing.T) {
 	// Start dispatcher
 	dispatcherDone := make(chan struct{})
 	go func() {
-		dispatcher(ctxWithConfig, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		Dispatcher(ctxWithConfig, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		close(dispatcherDone)
 	}()
 
@@ -70,7 +70,7 @@ func TestIntegration_SignalDuringTestRun(t *testing.T) {
 
 	// Create config
 	config := NewTestConfig()
-	ctxWithConfig := withConfig(ctx, config)
+	ctxWithConfig := WithConfig(ctx, config)
 
 	// Create channels
 	fileChangeChan := make(chan FileChangeMessage, 1)
@@ -81,7 +81,7 @@ func TestIntegration_SignalDuringTestRun(t *testing.T) {
 	// Start dispatcher
 	dispatcherDone := make(chan struct{})
 	go func() {
-		dispatcher(ctxWithConfig, fileChangeChan, commandChan, helpChan, testCompleteChan)
+		Dispatcher(ctxWithConfig, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		close(dispatcherDone)
 	}()
 
@@ -127,7 +127,7 @@ func TestIntegration_ContextChainPreservation(t *testing.T) {
 
 	// Add config to context
 	config := NewTestConfig()
-	fullCtx := withConfig(signalCtx, config)
+	fullCtx := WithConfig(signalCtx, config)
 
 	// Verify all values are accessible
 	assert.Equal(t, "base value", fullCtx.Value(customKey{}), "should preserve base context value")
@@ -152,7 +152,7 @@ func TestIntegration_ConfigAccessFromContext(t *testing.T) {
 	config.SetVerbose(true)
 	config.SetRunPattern("TestIntegration")
 
-	ctx := withConfig(context.Background(), config)
+	ctx := WithConfig(context.Background(), config)
 
 	// Launch multiple goroutines that access config from context
 	done := make(chan bool, 3)
