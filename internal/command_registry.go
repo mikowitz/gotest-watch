@@ -1,10 +1,14 @@
-package main
+package internal
 
 import "fmt"
 
 type CommandHandler func(*TestConfig, []string) error
 
 var commandRegistry map[Command]CommandHandler
+
+func InitRegistry() {
+	initRegistry()
+}
 
 func initRegistry() {
 	commandRegistry = make(map[Command]CommandHandler)

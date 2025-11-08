@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -267,7 +267,7 @@ func TestAddWatchRecursive_WithFile(t *testing.T) {
 }
 
 // ============================================================================
-// watchFiles Tests
+// WatchFiles Tests
 // ============================================================================
 
 // TestWatchFiles_DetectsGoFileCreation tests that creating a .go file triggers a message
@@ -282,7 +282,7 @@ func TestWatchFiles_DetectsGoFileCreation(t *testing.T) {
 	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+	go WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -317,7 +317,7 @@ func TestWatchFiles_DetectsGoFileModification(t *testing.T) {
 	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+	go WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -347,7 +347,7 @@ func TestWatchFiles_IgnoresNonGoFiles(t *testing.T) {
 	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+	go WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -379,7 +379,7 @@ func TestWatchFiles_DebounceMultipleChanges(t *testing.T) {
 	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+	go WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -422,7 +422,7 @@ func TestWatchFiles_TimerResetOnSubsequentChanges(t *testing.T) {
 	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+	go WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -471,7 +471,7 @@ func TestWatchFiles_HandlesNestedDirectories(t *testing.T) {
 	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+	go WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -506,7 +506,7 @@ func TestWatchFiles_IgnoresHiddenDirectories(t *testing.T) {
 	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+	go WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -537,7 +537,7 @@ func TestWatchFiles_ContextCancellation(t *testing.T) {
 	// Start watcher
 	watcherDone := make(chan struct{})
 	go func() {
-		watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+		WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 		close(watcherDone)
 	}()
 
@@ -592,7 +592,7 @@ func TestWatchFiles_MultipleFileTypes(t *testing.T) {
 	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+	go WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)
@@ -641,7 +641,7 @@ func TestWatchFiles_FileRemoval(t *testing.T) {
 	close(startWatching) // Close immediately so watcher starts without blocking
 
 	// Start watcher
-	go watchFiles(ctx, tempDir, fileChangeChan, startWatching)
+	go WatchFiles(ctx, tempDir, fileChangeChan, startWatching)
 
 	// Give watcher time to start
 	time.Sleep(50 * time.Millisecond)

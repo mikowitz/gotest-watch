@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 )
 
 //nolint:funlen
-func dispatcher(
+func Dispatcher(
 	ctx context.Context,
 	fileChangeChan chan FileChangeMessage,
 	commandChan chan CommandMessage,
@@ -91,7 +91,7 @@ func dispatcher(
 			case <-fileChangeChan:
 				testRunning = true
 				fmt.Println("\nFile change detected, running tests...")
-				go runTests(ctx, testCompleteChan, nil, nil)
+				go RunTests(ctx, testCompleteChan, nil, nil)
 
 			case cmd := <-commandChan:
 				// Execute command handler
@@ -102,7 +102,7 @@ func dispatcher(
 				// Spawn test runner if command requires it
 				if cmd.Command == ForceRunCmd {
 					testRunning = true
-					go runTests(ctx, testCompleteChan, nil, nil)
+					go RunTests(ctx, testCompleteChan, nil, nil)
 				} else {
 					// Show prompt after non-test commands
 					displayPrompt()

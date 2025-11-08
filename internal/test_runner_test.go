@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"bufio"
@@ -143,11 +143,11 @@ func TestExample(t *testing.T) {
 		WorkingDir: tempDir,
 	}
 
-	ctx := withConfig(context.Background(), config)
+	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
 	// Run a simple command that will succeed
-	go runTests(ctx, testCompleteChan, nil, nil)
+	go RunTests(ctx, testCompleteChan, nil, nil)
 
 	waitForTestCompletion(t, testCompleteChan)
 }
@@ -171,9 +171,9 @@ func TestFoo(t *testing.T) {
 		WorkingDir: tempDir,
 	}
 
-	ctx := withConfig(context.Background(), config)
+	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	go runTests(ctx, testCompleteChan, nil, nil)
+	go RunTests(ctx, testCompleteChan, nil, nil)
 
 	waitForTestCompletion(t, testCompleteChan)
 }
@@ -199,14 +199,14 @@ func TestWithOutput(t *testing.T) {
 		WorkingDir: tempDir,
 	}
 
-	ctx := withConfig(context.Background(), config)
+	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
 	// Capture both stdout and stderr using pipes
 	rOut, wOut, _ := os.Pipe()
 	rErr, wErr, _ := os.Pipe()
 
-	go runTests(ctx, testCompleteChan, wOut, wErr)
+	go RunTests(ctx, testCompleteChan, wOut, wErr)
 
 	waitForTestCompletion(t, testCompleteChan)
 
@@ -247,9 +247,9 @@ func TestFailure(t *testing.T) {
 		WorkingDir: tempDir,
 	}
 
-	ctx := withConfig(context.Background(), config)
+	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	go runTests(ctx, testCompleteChan, nil, nil)
+	go RunTests(ctx, testCompleteChan, nil, nil)
 
 	waitForTestCompletion(t, testCompleteChan)
 }
@@ -273,11 +273,11 @@ func TestWait(t *testing.T) {
 		WorkingDir: tempDir,
 	}
 
-	ctx := withConfig(context.Background(), config)
+	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
 	start := time.Now()
-	go runTests(ctx, testCompleteChan, nil, nil)
+	go RunTests(ctx, testCompleteChan, nil, nil)
 
 	waitForTestCompletion(t, testCompleteChan)
 
@@ -306,9 +306,9 @@ func TestPattern(t *testing.T) {
 		WorkingDir: tempDir,
 	}
 
-	ctx := withConfig(context.Background(), config)
+	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
-	go runTests(ctx, testCompleteChan, nil, nil)
+	go RunTests(ctx, testCompleteChan, nil, nil)
 
 	waitForTestCompletion(t, testCompleteChan)
 }
@@ -332,7 +332,7 @@ func TestCancel(t *testing.T) {
 		WorkingDir: tempDir,
 	}
 
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
 	// Cancel context immediately
@@ -341,7 +341,7 @@ func TestCancel(t *testing.T) {
 	// Create a done channel to track if runTests completes
 	done := make(chan struct{})
 	go func() {
-		runTests(ctx, testCompleteChan, nil, nil)
+		RunTests(ctx, testCompleteChan, nil, nil)
 		close(done)
 	}()
 
@@ -378,10 +378,10 @@ func TestCommand(t *testing.T) {
 		WorkingDir: tempDir,
 	}
 
-	ctx := withConfig(context.Background(), config)
+	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
-	go runTests(ctx, testCompleteChan, nil, nil)
+	go RunTests(ctx, testCompleteChan, nil, nil)
 
 	// Wait for completion
 	select {
@@ -463,7 +463,7 @@ func TestStdout(t *testing.T) {
 		WorkingDir: tempDir,
 	}
 
-	ctx := withConfig(context.Background(), config)
+	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
 	// Capture stdout to verify output is streamed
@@ -471,7 +471,7 @@ func TestStdout(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	go runTests(ctx, testCompleteChan, nil, nil)
+	go RunTests(ctx, testCompleteChan, nil, nil)
 
 	select {
 	case <-testCompleteChan:
@@ -503,7 +503,7 @@ func TestRunTests_CreatesStderrPipe(t *testing.T) {
 		RunPattern: "",
 	}
 
-	ctx := withConfig(context.Background(), config)
+	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 
 	// Capture stderr
@@ -511,7 +511,7 @@ func TestRunTests_CreatesStderrPipe(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stderr = w
 
-	go runTests(ctx, testCompleteChan, nil, nil)
+	go RunTests(ctx, testCompleteChan, nil, nil)
 
 	select {
 	case <-testCompleteChan:
@@ -583,10 +583,10 @@ func TestTwo(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ctx := withConfig(context.Background(), tc.config)
+			ctx := WithConfig(context.Background(), tc.config)
 			testCompleteChan := make(chan TestCompleteMessage, 1)
 
-			go runTests(ctx, testCompleteChan, nil, nil)
+			go RunTests(ctx, testCompleteChan, nil, nil)
 
 			select {
 			case <-testCompleteChan:

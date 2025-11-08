@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -16,7 +16,7 @@ func TestDispatcher_FileChangeSpawnsTestRunner(t *testing.T) {
 		RunPattern: "",
 	}
 
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	commandChan := make(chan CommandMessage, 1)
@@ -26,7 +26,7 @@ func TestDispatcher_FileChangeSpawnsTestRunner(t *testing.T) {
 	// Start dispatcher in background
 	go func() {
 		captureStdout(t, func() {
-			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+			Dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		})
 	}()
 
@@ -53,7 +53,7 @@ func TestDispatcher_FileChangeIgnoredWhenTestRunning(t *testing.T) {
 		RunPattern: "",
 	}
 
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 10)
 	commandChan := make(chan CommandMessage, 1)
@@ -62,7 +62,7 @@ func TestDispatcher_FileChangeIgnoredWhenTestRunning(t *testing.T) {
 
 	go func() {
 		captureStdout(t, func() {
-			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+			Dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		})
 	}()
 
@@ -100,7 +100,7 @@ func TestDispatcher_CommandMessageCallsHandler(t *testing.T) {
 		RunPattern: "",
 	}
 
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	commandChan := make(chan CommandMessage, 1)
@@ -109,7 +109,7 @@ func TestDispatcher_CommandMessageCallsHandler(t *testing.T) {
 
 	go func() {
 		captureStdout(t, func() {
-			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+			Dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		})
 	}()
 
@@ -131,7 +131,7 @@ func TestDispatcher_CommandMessageSpawnsTestRunner(t *testing.T) {
 		RunPattern: "",
 	}
 
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	commandChan := make(chan CommandMessage, 1)
@@ -140,7 +140,7 @@ func TestDispatcher_CommandMessageSpawnsTestRunner(t *testing.T) {
 
 	go func() {
 		captureStdout(t, func() {
-			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+			Dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		})
 	}()
 
@@ -165,7 +165,7 @@ func TestDispatcher_CommandMessageIgnoredWhenTestRunning(t *testing.T) {
 		RunPattern: "",
 	}
 
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	commandChan := make(chan CommandMessage, 10)
@@ -174,7 +174,7 @@ func TestDispatcher_CommandMessageIgnoredWhenTestRunning(t *testing.T) {
 
 	go func() {
 		captureStdout(t, func() {
-			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+			Dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		})
 	}()
 
@@ -208,7 +208,7 @@ func TestDispatcher_HelpMessageDoesNotSpawnTestRunner(t *testing.T) {
 		RunPattern: "",
 	}
 
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	commandChan := make(chan CommandMessage, 1)
@@ -217,7 +217,7 @@ func TestDispatcher_HelpMessageDoesNotSpawnTestRunner(t *testing.T) {
 
 	go func() {
 		captureStdout(t, func() {
-			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+			Dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		})
 	}()
 
@@ -231,7 +231,7 @@ func TestDispatcher_HelpMessageDoesNotSpawnTestRunner(t *testing.T) {
 	assert.Equal(t, 0, len(testCompleteChan), "help command should not start test runner")
 }
 
-// TestDispatcher_TestCompleteMessageUpdatesState tests TestCompleteMessage updates state
+// TestDispatcher_TestCompleteMessageUpdatesState tests TestCompleteMesSage updates state
 func TestDispatcher_TestCompleteMessageUpdatesState(t *testing.T) {
 	config := &TestConfig{
 		TestPath:   "./...",
@@ -239,7 +239,7 @@ func TestDispatcher_TestCompleteMessageUpdatesState(t *testing.T) {
 		RunPattern: "",
 	}
 
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 10)
 	commandChan := make(chan CommandMessage, 1)
@@ -248,7 +248,7 @@ func TestDispatcher_TestCompleteMessageUpdatesState(t *testing.T) {
 
 	go func() {
 		captureStdout(t, func() {
-			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+			Dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		})
 	}()
 
@@ -288,7 +288,7 @@ func TestDispatcher_ContextDoneExitsGracefully(t *testing.T) {
 		RunPattern: "",
 	}
 
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 
 	fileChangeChan := make(chan FileChangeMessage, 1)
 	commandChan := make(chan CommandMessage, 1)
@@ -298,7 +298,7 @@ func TestDispatcher_ContextDoneExitsGracefully(t *testing.T) {
 	done := make(chan struct{})
 	go func() {
 		captureStdout(t, func() {
-			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+			Dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		})
 		close(done)
 	}()
@@ -326,7 +326,7 @@ func TestDispatcher_StateTransitions(t *testing.T) {
 		RunPattern: "",
 	}
 
-	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
+	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
 	fileChangeChan := make(chan FileChangeMessage, 10)
 	commandChan := make(chan CommandMessage, 1)
@@ -335,7 +335,7 @@ func TestDispatcher_StateTransitions(t *testing.T) {
 
 	go func() {
 		captureStdout(t, func() {
-			dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
+			Dispatcher(ctx, fileChangeChan, commandChan, helpChan, testCompleteChan)
 		})
 	}()
 

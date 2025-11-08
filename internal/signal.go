@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -7,6 +7,10 @@ import (
 	"os/signal"
 	"syscall"
 )
+
+func SetupSignalHandler() (context.Context, context.CancelFunc) {
+	return setupSignalHandler()
+}
 
 func setupSignalHandler() (context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithCancel(context.Background())

@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"bufio"
@@ -33,7 +33,7 @@ func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup) {
 }
 
 //nolint:funlen
-func runTests(
+func RunTests(
 	ctx context.Context,
 	completeChan chan TestCompleteMessage,
 	stdoutWriter io.Writer,
