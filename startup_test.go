@@ -196,8 +196,18 @@ func TestStartupSequence_PromptAppearsAfterInitialTest(t *testing.T) {
 
 // TestStartupSequence_FullIntegration tests complete startup sequence integration
 func TestStartupSequence_FullIntegration(t *testing.T) {
+	// Set up a test module with a simple passing test
+	testContent := `package main
+import "testing"
+func TestMessage(t *testing.T) {
+	// Simple passing test
+}
+`
+	tempDir := setupTestModule(t, testContent)
+
 	config := NewTestConfig()
 	config.SetRunPattern("Message")
+	config.WorkingDir = tempDir
 	ctx, cancel := context.WithCancel(withConfig(context.Background(), config))
 	defer cancel()
 
@@ -205,7 +215,6 @@ func TestStartupSequence_FullIntegration(t *testing.T) {
 	testCompleteChan := make(chan TestCompleteMessage, 1)
 	fileChangeChan := make(chan FileChangeMessage, 10)
 	startWatching := make(chan struct{})
-	tempDir := t.TempDir()
 
 	events := make(chan string, 20)
 
