@@ -25,7 +25,7 @@ func dispatcher(
 	}
 
 	// Show initial prompt
-	fmt.Print("> ")
+	displayPrompt()
 
 	for {
 		if testRunning {
@@ -73,7 +73,7 @@ func dispatcher(
 				}
 
 				// Show prompt
-				fmt.Print("> ")
+				displayPrompt()
 			case <-ctx.Done():
 				// Wait for test to finish before shutting down
 				select {
@@ -105,7 +105,7 @@ func dispatcher(
 					go runTests(ctx, testCompleteChan, nil, nil)
 				} else {
 					// Show prompt after non-test commands
-					fmt.Print("> ")
+					displayPrompt()
 				}
 
 			case <-helpChan:
@@ -114,7 +114,7 @@ func dispatcher(
 					fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 				}
 				// Show prompt after help
-				fmt.Print("> ")
+				displayPrompt()
 
 			case <-ctx.Done():
 				fmt.Println("Shutting down...")
