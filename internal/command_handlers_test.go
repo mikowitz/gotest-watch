@@ -953,3 +953,183 @@ func TestHandleFailFast_IgnoresArguments(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, config.GetFailFast(), "Should toggle regardless of arguments")
 }
+
+func TestHandleCount_WithValidPositiveNumber(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    0,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{"5"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 5, config.GetCount(), "Should set count to 5")
+	assert.Equal(t, "Count: 5\n", output, "Should print count message")
+}
+
+func TestHandleCount_WithZero(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    10,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{"0"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 0, config.GetCount(), "Should set count to 0")
+	assert.Equal(t, "Count: cleared\n", output, "Should print cleared message")
+}
+
+func TestHandleCount_WithoutArgs(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    10,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 0, config.GetCount(), "Should clear count")
+	assert.Equal(t, "Count: cleared\n", output, "Should print cleared message")
+}
+
+func TestHandleCount_WithNilArgs(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    10,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, nil)
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 0, config.GetCount(), "Should clear count with nil args")
+	assert.Equal(t, "Count: cleared\n", output, "Should print cleared message")
+}
+
+func TestHandleCount_WithNegativeNumber(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    5,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{"-5"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 5, config.GetCount(), "Count should remain unchanged")
+	assert.Contains(t, output, "Error: count value must be non-negative (got -5)", "Should print error message")
+}
+
+func TestHandleCount_WithInvalidString(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    5,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{"abc"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 5, config.GetCount(), "Count should remain unchanged")
+	assert.Contains(t, output, "Error: invalid count value", "Should print error message")
+	assert.Contains(t, output, "must be a non-negative integer", "Should explain requirement")
+}
+
+func TestHandleCount_WithFloat(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    5,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{"3.14"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 5, config.GetCount(), "Count should remain unchanged")
+	assert.Contains(t, output, "Error: invalid count value", "Should print error message")
+}
+
+func TestHandleCount_WithEmptyString(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    5,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{""})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 5, config.GetCount(), "Count should remain unchanged")
+	assert.Contains(t, output, "Error: invalid count value", "Should print error message")
+}
+
+func TestHandleCount_WithMultipleArgs(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    0,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{"10", "20", "30"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 10, config.GetCount(), "Should use only first argument")
+	assert.Equal(t, "Count: 10\n", output, "Should print first argument")
+}
+
+func TestHandleCount_TogglesMultipleTimes(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    0,
+	}
+
+	// Set to 5
+	err := handleCount(config, []string{"5"})
+	require.NoError(t, err)
+	assert.Equal(t, 5, config.GetCount())
+
+	// Change to 10
+	err = handleCount(config, []string{"10"})
+	require.NoError(t, err)
+	assert.Equal(t, 10, config.GetCount())
+
+	// Clear
+	err = handleCount(config, []string{})
+	require.NoError(t, err)
+	assert.Equal(t, 0, config.GetCount())
+
+	// Set to 3
+	err = handleCount(config, []string{"3"})
+	require.NoError(t, err)
+	assert.Equal(t, 3, config.GetCount())
+}
+
+func TestHandleCount_WorksViaRegistry(t *testing.T) {
+	initRegistry()
+
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    0,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCommand(Command("count"), config, []string{"7"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 7, config.GetCount())
+	assert.Equal(t, "Count: 7\n", output)
+}

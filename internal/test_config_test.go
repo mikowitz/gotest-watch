@@ -19,7 +19,13 @@ func TestBuildCommand(t *testing.T) {
 		{"verbose enabled", "./...", true, "", []string{"go", "test"}, "go test ./... -v"},
 		{"run pattern set", "./...", false, "MyTest", []string{"go", "test"}, "go test ./... -run=MyTest"},
 		{"specific test path", "./testing", false, "", []string{"go", "test"}, "go test ./testing"},
-		{"multiple test paths", "./testing ./integration", false, "", []string{"go", "test"}, "go test ./testing ./integration"},
+		{
+			"multiple test paths",
+			"./testing ./integration",
+			false, "",
+			[]string{"go", "test"},
+			"go test ./testing ./integration",
+		},
 		{"everything configured", "./mytests", true, "MyTest", []string{"go", "test"}, "go test ./mytests -v -run=MyTest"},
 	}
 

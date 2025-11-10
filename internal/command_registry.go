@@ -23,6 +23,7 @@ func initRegistry() {
 	commandRegistry[SetCommandBaseCmd] = handleCommandBase
 	commandRegistry[RaceCmd] = handleRace
 	commandRegistry[FailFastCmd] = handleFailFast
+	commandRegistry[CountCmd] = handleCount
 }
 
 func handleCommand(command Command, config *TestConfig, args []string) error {

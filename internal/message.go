@@ -22,6 +22,7 @@ const (
 	ForceRunCmd       Command = "f"
 	RaceCmd           Command = "race"
 	FailFastCmd       Command = "ff"
+	CountCmd          Command = "count"
 	SetCommandBaseCmd Command = "cmd"
 )
 

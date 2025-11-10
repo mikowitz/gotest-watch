@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -14,6 +15,7 @@ type TestConfig struct {
 	CommandBase []string
 	Race        bool
 	FailFast    bool
+	Count       int
 	WorkingDir  string // Optional: if set, tests will run in this directory
 }
 
@@ -40,6 +42,10 @@ func (tc *TestConfig) BuildCommand() string {
 	}
 	if tc.FailFast {
 		b.WriteString(" -failfast")
+	}
+	if tc.Count > 0 {
+		b.WriteString(" -count=")
+		b.WriteString(strconv.Itoa(tc.Count))
 	}
 	if tc.RunPattern != "" {
 		b.WriteString(" -run=")
@@ -94,6 +100,12 @@ func (tc *TestConfig) GetFailFast() bool {
 	return tc.FailFast
 }
 
+func (tc *TestConfig) GetCount() int {
+	tc.RLock()
+	defer tc.RUnlock()
+	return tc.Count
+}
+
 // Safe setters
 func (tc *TestConfig) SetVerbose(v bool) {
 	tc.Lock()
@@ -125,6 +137,12 @@ func (tc *TestConfig) SetCommandBase(commandBase []string) {
 	tc.CommandBase = commandBase
 }
 
+func (tc *TestConfig) SetCount(count int) {
+	tc.Lock()
+	defer tc.Unlock()
+	tc.Count = count
+}
+
 func (tc *TestConfig) ToggleVerbose() {
 	tc.Lock()
 	defer tc.Unlock()
@@ -153,4 +171,5 @@ func (tc *TestConfig) Clear() {
 	tc.CommandBase = []string{"go", "test"}
 	tc.Race = false
 	tc.FailFast = false
+	tc.Count = 0
 }
