@@ -26,6 +26,16 @@ func handleRace(config *TestConfig, _ []string) error {
 	return nil
 }
 
+func handleFailFast(config *TestConfig, _ []string) error {
+	config.ToggleFailFast()
+	if config.GetFailFast() {
+		fmt.Println("FailFast: enabled")
+	} else {
+		fmt.Println("FailFast: disabled")
+	}
+	return nil
+}
+
 func handleClear(config *TestConfig, _ []string) error {
 	config.Clear()
 	fmt.Println("All parameters cleared")
@@ -100,6 +110,7 @@ func handleHelp(_ *TestConfig, _ []string) error {
 	fmt.Println("Available commands:")
 	fmt.Println("  v            Toggle verbose mode (-v flag)")
 	fmt.Println("  race         Toggle race mode (-race flag)")
+	fmt.Println("  ff           Toggle failfast mode (-failfast flag)")
 	fmt.Println("  r <pattern>  Set test run pattern (-run=<pattern>)")
 	fmt.Println("  r            Clear run pattern")
 	fmt.Println("  s <pattern>  Set test skip pattern (-skip=<pattern>)")

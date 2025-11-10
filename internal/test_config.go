@@ -13,6 +13,7 @@ type TestConfig struct {
 	SkipPattern string
 	CommandBase []string
 	Race        bool
+	FailFast    bool
 	WorkingDir  string // Optional: if set, tests will run in this directory
 }
 
@@ -36,6 +37,9 @@ func (tc *TestConfig) BuildCommand() string {
 	}
 	if tc.Race {
 		b.WriteString(" -race")
+	}
+	if tc.FailFast {
+		b.WriteString(" -failfast")
 	}
 	if tc.RunPattern != "" {
 		b.WriteString(" -run=")
@@ -84,6 +88,12 @@ func (tc *TestConfig) GetRace() bool {
 	return tc.Race
 }
 
+func (tc *TestConfig) GetFailFast() bool {
+	tc.RLock()
+	defer tc.RUnlock()
+	return tc.FailFast
+}
+
 // Safe setters
 func (tc *TestConfig) SetVerbose(v bool) {
 	tc.Lock()
@@ -127,6 +137,12 @@ func (tc *TestConfig) ToggleRace() {
 	tc.Race = !tc.Race
 }
 
+func (tc *TestConfig) ToggleFailFast() {
+	tc.Lock()
+	defer tc.Unlock()
+	tc.FailFast = !tc.FailFast
+}
+
 func (tc *TestConfig) Clear() {
 	tc.Lock()
 	defer tc.Unlock()
@@ -136,4 +152,5 @@ func (tc *TestConfig) Clear() {
 	tc.SkipPattern = ""
 	tc.CommandBase = []string{"go", "test"}
 	tc.Race = false
+	tc.FailFast = false
 }

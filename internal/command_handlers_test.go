@@ -886,3 +886,70 @@ func TestHandleRace_IgnoresArguments(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, config.GetRace(), "Should toggle regardless of arguments")
 }
+
+func TestHandleFailFast_TogglesFromFalseToTrue(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		FailFast:   false,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleFailFast(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.True(t, config.GetFailFast(), "FailFast should be toggled to true")
+	assert.Equal(t, "FailFast: enabled\n", output, "Should print enabled message")
+}
+
+func TestHandleFailFast_TogglesFromTrueToFalse(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		FailFast:   true,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleFailFast(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.False(t, config.GetFailFast(), "FailFast should be toggled to false")
+	assert.Equal(t, "FailFast: disabled\n", output, "Should print disabled message")
+}
+
+func TestHandleFailFast_TogglesMultipleTimes(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		FailFast:   false,
+		RunPattern: "",
+	}
+
+	// Toggle on
+	err := handleFailFast(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetFailFast())
+
+	// Toggle off
+	err = handleFailFast(config, []string{})
+	require.NoError(t, err)
+	assert.False(t, config.GetFailFast())
+
+	// Toggle on again
+	err = handleFailFast(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetFailFast())
+}
+
+func TestHandleFailFast_IgnoresArguments(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		FailFast:   false,
+		RunPattern: "",
+	}
+
+	err := handleFailFast(config, []string{"arg1", "arg2"})
+	require.NoError(t, err)
+	assert.True(t, config.GetFailFast(), "Should toggle regardless of arguments")
+}
