@@ -6,34 +6,36 @@ import (
 )
 
 type TestConfig struct {
-	mu          sync.RWMutex
+	sync.RWMutex
 	TestPath    string
 	Verbose     bool
 	RunPattern  string
 	SkipPattern string
 	CommandBase []string
+	Race        bool
 	WorkingDir  string // Optional: if set, tests will run in this directory
 }
 
 func NewTestConfig() *TestConfig {
 	return &TestConfig{
 		TestPath:    "./...",
-		Verbose:     false,
-		RunPattern:  "",
-		SkipPattern: "",
 		CommandBase: []string{"go", "test"},
 	}
 }
 
 func (tc *TestConfig) BuildCommand() string {
-	tc.mu.RLock()
-	defer tc.mu.RUnlock()
+	tc.RLock()
+	defer tc.RUnlock()
 
 	var b strings.Builder
-	b.WriteString("go test ")
+	b.WriteString(strings.Join(tc.CommandBase, " "))
+	b.WriteString(" ")
 	b.WriteString(tc.TestPath)
 	if tc.Verbose {
 		b.WriteString(" -v")
+	}
+	if tc.Race {
+		b.WriteString(" -race")
 	}
 	if tc.RunPattern != "" {
 		b.WriteString(" -run=")
@@ -46,79 +48,98 @@ func (tc *TestConfig) BuildCommand() string {
 	return b.String()
 }
 
-// Safe getters
 func (tc *TestConfig) GetVerbose() bool {
-	tc.mu.RLock()
-	defer tc.mu.RUnlock()
+	tc.RLock()
+	defer tc.RUnlock()
 	return tc.Verbose
 }
 
 func (tc *TestConfig) GetTestPath() string {
-	tc.mu.RLock()
-	defer tc.mu.RUnlock()
+	tc.RLock()
+	defer tc.RUnlock()
 	return tc.TestPath
 }
 
 func (tc *TestConfig) GetRunPattern() string {
-	tc.mu.RLock()
-	defer tc.mu.RUnlock()
+	tc.RLock()
+	defer tc.RUnlock()
 	return tc.RunPattern
 }
 
 func (tc *TestConfig) GetSkipPattern() string {
-	tc.mu.RLock()
-	defer tc.mu.RUnlock()
+	tc.RLock()
+	defer tc.RUnlock()
 	return tc.SkipPattern
 }
 
 func (tc *TestConfig) GetCommandBase() []string {
-	tc.mu.RLock()
-	defer tc.mu.RUnlock()
+	tc.RLock()
+	defer tc.RUnlock()
 	return tc.CommandBase
+}
+
+func (tc *TestConfig) GetRace() bool {
+	tc.RLock()
+	defer tc.RUnlock()
+	return tc.Race
 }
 
 // Safe setters
 func (tc *TestConfig) SetVerbose(v bool) {
-	tc.mu.Lock()
-	defer tc.mu.Unlock()
+	tc.Lock()
+	defer tc.Unlock()
 	tc.Verbose = v
 }
 
 func (tc *TestConfig) SetTestPath(path string) {
-	tc.mu.Lock()
-	defer tc.mu.Unlock()
+	tc.Lock()
+	defer tc.Unlock()
 	tc.TestPath = path
 }
 
 func (tc *TestConfig) SetRunPattern(pattern string) {
-	tc.mu.Lock()
-	defer tc.mu.Unlock()
+	tc.Lock()
+	defer tc.Unlock()
 	tc.RunPattern = pattern
 }
 
 func (tc *TestConfig) SetSkipPattern(pattern string) {
-	tc.mu.Lock()
-	defer tc.mu.Unlock()
+	tc.Lock()
+	defer tc.Unlock()
 	tc.SkipPattern = pattern
 }
 
 func (tc *TestConfig) SetCommandBase(commandBase []string) {
-	tc.mu.Lock()
-	defer tc.mu.Unlock()
+	tc.Lock()
+	defer tc.Unlock()
 	tc.CommandBase = commandBase
 }
 
+func (tc *TestConfig) SetRace(r bool) {
+	tc.Lock()
+	defer tc.Unlock()
+	tc.Race = r
+}
+
 func (tc *TestConfig) ToggleVerbose() {
-	tc.mu.Lock()
-	defer tc.mu.Unlock()
+	tc.Lock()
+	defer tc.Unlock()
 	tc.Verbose = !tc.Verbose
 }
 
+func (tc *TestConfig) ToggleRace() {
+	tc.Lock()
+	defer tc.Unlock()
+	tc.Race = !tc.Race
+}
+
 func (tc *TestConfig) Clear() {
-	tc.mu.Lock()
-	defer tc.mu.Unlock()
+	tc.Lock()
+	defer tc.Unlock()
 	tc.TestPath = "./..."
 	tc.Verbose = false
 	tc.RunPattern = ""
 	tc.SkipPattern = ""
+	tc.CommandBase = []string{"go", "test"}
+	tc.Race = false
 }

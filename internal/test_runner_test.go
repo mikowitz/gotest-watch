@@ -136,12 +136,9 @@ func TestExample(t *testing.T) {
 `
 	tempDir := setupTestModule(t, testContent)
 
-	config := &TestConfig{
-		TestPath:   ".",
-		Verbose:    false,
-		RunPattern: "",
-		WorkingDir: tempDir,
-	}
+	config := NewTestConfig()
+	config.SetTestPath(".")
+	config.WorkingDir = tempDir
 
 	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
@@ -164,12 +161,10 @@ func TestFoo(t *testing.T) {
 `
 	tempDir := setupTestModule(t, testContent)
 
-	config := &TestConfig{
-		TestPath:   ".",
-		Verbose:    true,
-		RunPattern: "TestFoo",
-		WorkingDir: tempDir,
-	}
+	config := NewTestConfig()
+	config.SetTestPath(".")
+	config.SetRunPattern("TestFoo")
+	config.WorkingDir = tempDir
 
 	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
@@ -192,12 +187,10 @@ func TestWithOutput(t *testing.T) {
 `
 	tempDir := setupTestModule(t, testContent)
 
-	config := &TestConfig{
-		TestPath:   ".",
-		Verbose:    true, // Enable verbose to see output
-		RunPattern: "",
-		WorkingDir: tempDir,
-	}
+	config := NewTestConfig()
+	config.SetTestPath(".")
+	config.ToggleVerbose()
+	config.WorkingDir = tempDir
 
 	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
@@ -240,12 +233,9 @@ func TestFailure(t *testing.T) {
 	tempDir := setupTestModule(t, testContent)
 
 	// Run the test that will fail
-	config := &TestConfig{
-		TestPath:   ".",
-		Verbose:    false,
-		RunPattern: "",
-		WorkingDir: tempDir,
-	}
+	config := NewTestConfig()
+	config.SetTestPath(".")
+	config.WorkingDir = tempDir
 
 	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
@@ -266,12 +256,10 @@ func TestWait(t *testing.T) {
 `
 	tempDir := setupTestModule(t, testContent)
 
-	config := &TestConfig{
-		TestPath:   ".",
-		Verbose:    true, // More output to test streaming
-		RunPattern: "",
-		WorkingDir: tempDir,
-	}
+	config := NewTestConfig()
+	config.ToggleVerbose()
+	config.SetTestPath(".")
+	config.WorkingDir = tempDir
 
 	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
@@ -299,12 +287,11 @@ func TestPattern(t *testing.T) {
 `
 	tempDir := setupTestModule(t, testContent)
 
-	config := &TestConfig{
-		TestPath:   ".",
-		Verbose:    true,
-		RunPattern: "TestPattern",
-		WorkingDir: tempDir,
-	}
+	config := NewTestConfig()
+	config.SetTestPath(".")
+	config.ToggleVerbose()
+	config.SetRunPattern("TestPattern")
+	config.WorkingDir = tempDir
 
 	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
@@ -325,12 +312,9 @@ func TestCancel(t *testing.T) {
 `
 	tempDir := setupTestModule(t, testContent)
 
-	config := &TestConfig{
-		TestPath:   ".",
-		Verbose:    false,
-		RunPattern: "",
-		WorkingDir: tempDir,
-	}
+	config := NewTestConfig()
+	config.SetTestPath(".")
+	config.WorkingDir = tempDir
 
 	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	testCompleteChan := make(chan TestCompleteMessage, 1)
@@ -371,12 +355,9 @@ func TestCommand(t *testing.T) {
 	tempDir := setupTestModule(t, testContent)
 
 	// This test verifies the command structure by running actual go test
-	config := &TestConfig{
-		TestPath:   ".",
-		Verbose:    false,
-		RunPattern: "",
-		WorkingDir: tempDir,
-	}
+	config := NewTestConfig()
+	config.SetTestPath(".")
+	config.WorkingDir = tempDir
 
 	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
@@ -456,12 +437,9 @@ func TestStdout(t *testing.T) {
 `
 	tempDir := setupTestModule(t, testContent)
 
-	config := &TestConfig{
-		TestPath:   ".",
-		Verbose:    false,
-		RunPattern: "",
-		WorkingDir: tempDir,
-	}
+	config := NewTestConfig()
+	config.SetTestPath(".")
+	config.WorkingDir = tempDir
 
 	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
@@ -497,11 +475,9 @@ func TestStdout(t *testing.T) {
 // TestRunTests_CreatesStderrPipe tests that runTests gets stderr pipe
 func TestRunTests_CreatesStderrPipe(t *testing.T) {
 	// Use invalid path to generate stderr output
-	config := &TestConfig{
-		TestPath:   "./nonexistent_path_12345",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	config := NewTestConfig()
+
+	config.SetTestPath("./nonexistent_path_12345")
 
 	ctx := WithConfig(context.Background(), config)
 	testCompleteChan := make(chan TestCompleteMessage, 1)
@@ -554,30 +530,32 @@ func TestTwo(t *testing.T) {
 	}{
 		{
 			name: "default config",
-			config: &TestConfig{
-				TestPath:   ".",
-				Verbose:    false,
-				RunPattern: "",
-				WorkingDir: tempDir,
-			},
+			config: func() *TestConfig {
+				c := NewTestConfig()
+				c.SetTestPath(".")
+				c.WorkingDir = tempDir
+				return c
+			}(),
 		},
 		{
 			name: "verbose config",
-			config: &TestConfig{
-				TestPath:   ".",
-				Verbose:    true,
-				RunPattern: "",
-				WorkingDir: tempDir,
-			},
+			config: func() *TestConfig {
+				c := NewTestConfig()
+				c.SetTestPath(".")
+				c.ToggleVerbose()
+				c.WorkingDir = tempDir
+				return c
+			}(),
 		},
 		{
 			name: "with pattern",
-			config: &TestConfig{
-				TestPath:   ".",
-				Verbose:    false,
-				RunPattern: "TestOne",
-				WorkingDir: tempDir,
-			},
+			config: func() *TestConfig {
+				c := NewTestConfig()
+				c.SetTestPath(".")
+				c.SetRunPattern("TestOne")
+				c.WorkingDir = tempDir
+				return c
+			}(),
 		},
 	}
 

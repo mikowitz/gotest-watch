@@ -26,6 +26,9 @@ func TestInitRegistry_RegistersSimpleHandlers(t *testing.T) {
 	_, hasVerbose := commandRegistry[Command("v")]
 	assert.True(t, hasVerbose, "Should register 'v' command")
 
+	_, hasRace := commandRegistry[Command("race")]
+	assert.True(t, hasRace, "Should register 'race' command")
+
 	_, hasClear := commandRegistry[Command("clear")]
 	assert.True(t, hasClear, "Should register 'clear' command")
 

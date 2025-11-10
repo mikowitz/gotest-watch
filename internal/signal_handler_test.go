@@ -65,11 +65,7 @@ func TestSignalHandlerMechanics(t *testing.T) {
 
 // TestSignalHandlerIntegration tests that signal handler can be used with dispatcher
 func TestSignalHandlerIntegration(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	config := NewTestConfig()
 
 	ctx, cancel := setupSignalHandler()
 	ctxWithConfig := WithConfig(ctx, config)

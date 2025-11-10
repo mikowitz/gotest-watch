@@ -20,6 +20,7 @@ const (
 	ClearCmd          Command = "clear"
 	ClearScreenCmd    Command = "cls"
 	ForceRunCmd       Command = "f"
+	RaceCmd           Command = "race"
 	SetCommandBaseCmd Command = "cmd"
 )
 

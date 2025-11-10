@@ -455,7 +455,7 @@ func TestHandleTestPath_WithNoArgs(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should not change on error")
+	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should reset on blank input")
 	assert.Equal(t, "Test path: ./...\n", output, "Should print path message")
 }
 
@@ -472,7 +472,7 @@ func TestHandleTestPath_WithNilArgs(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should not change on error")
+	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should reset on nil input")
 	assert.Equal(t, "Test path: ./...\n", output, "Should print path message")
 }
 
@@ -787,4 +787,102 @@ func TestHandleCommandBase_WithCommand(t *testing.T) {
 
 	assert.Equal(t, []string{"grc", "go", "test"}, config.GetCommandBase())
 	assert.Equal(t, "Test command: grc go test\n", output)
+}
+
+func TestHandleCommandBase_WithEmptyArgs(t *testing.T) {
+	initRegistry()
+
+	config := NewTestConfig()
+
+	output := captureStdout(t, func() {
+		err := handleCommand(Command("cmd"), config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, []string{"go", "test"}, config.GetCommandBase(), "command base resets on blank input")
+	assert.Equal(t, "Test command: go test\n", output)
+}
+
+func TestHandleCommandBase_WithNilArgs(t *testing.T) {
+	initRegistry()
+
+	config := NewTestConfig()
+
+	output := captureStdout(t, func() {
+		err := handleCommand(Command("cmd"), config, nil)
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, []string{"go", "test"}, config.GetCommandBase(), "command base resets on blank input")
+	assert.Equal(t, "Test command: go test\n", output)
+}
+
+func TestHandleRace_TogglesFromFalseToTrue(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Race:       false,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleRace(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.True(t, config.GetRace(), "Race should be toggled to true")
+	assert.Equal(t, "Race: enabled\n", output, "Should print enabled message")
+}
+
+// TestHandleRace_TogglesFromTrueToFalse tests verbose toggle from true to false
+func TestHandleRace_TogglesFromTrueToFalse(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Race:       true,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleRace(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.False(t, config.GetRace(), "Race should be toggled to false")
+	assert.Equal(t, "Race: disabled\n", output, "Should print disabled message")
+}
+
+// TestHandleRace_TogglesMultipleTimes tests verbose toggle multiple times
+func TestHandleRace_TogglesMultipleTimes(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Race:       false,
+		RunPattern: "",
+	}
+
+	// Toggle on
+	err := handleRace(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetRace())
+
+	// Toggle off
+	err = handleRace(config, []string{})
+	require.NoError(t, err)
+	assert.False(t, config.GetRace())
+
+	// Toggle on again
+	err = handleRace(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetRace())
+}
+
+// TestHandleRace_IgnoresArguments tests that handleRace ignores any arguments
+func TestHandleRace_IgnoresArguments(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Race:       false,
+		RunPattern: "",
+	}
+
+	err := handleRace(config, []string{"arg1", "arg2"})
+	require.NoError(t, err)
+	assert.True(t, config.GetRace(), "Should toggle regardless of arguments")
 }

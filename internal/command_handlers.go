@@ -16,6 +16,16 @@ func handleVerbose(config *TestConfig, _ []string) error {
 	return nil
 }
 
+func handleRace(config *TestConfig, _ []string) error {
+	config.ToggleRace()
+	if config.GetRace() {
+		fmt.Println("Race: enabled")
+	} else {
+		fmt.Println("Race: disabled")
+	}
+	return nil
+}
+
 func handleClear(config *TestConfig, _ []string) error {
 	config.Clear()
 	fmt.Println("All parameters cleared")
@@ -89,12 +99,14 @@ func handleCommandBase(config *TestConfig, args []string) error {
 func handleHelp(_ *TestConfig, _ []string) error {
 	fmt.Println("Available commands:")
 	fmt.Println("  v            Toggle verbose mode (-v flag)")
+	fmt.Println("  race         Toggle race mode (-race flag)")
 	fmt.Println("  r <pattern>  Set test run pattern (-run=<pattern>)")
 	fmt.Println("  r            Clear run pattern")
 	fmt.Println("  s <pattern>  Set test skip pattern (-skip=<pattern>)")
 	fmt.Println("  s            Clear skip pattern")
 	fmt.Println("  p <path>     Set test path (default: ./...")
 	fmt.Println("  p            Set test path to default (./...)")
+	fmt.Println("  cmd          Set the base command to run (default: go test)")
 	fmt.Println("  clear        Clear all parameters")
 	fmt.Println("  cls          Clear screen")
 	fmt.Println("  f            Force test run")
