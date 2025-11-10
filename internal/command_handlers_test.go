@@ -84,9 +84,10 @@ func TestHandleVerbose_IgnoresArguments(t *testing.T) {
 // TestHandleClear_ResetsAllFields tests that handleClear resets all config fields
 func TestHandleClear_ResetsAllFields(t *testing.T) {
 	config := &TestConfig{
-		TestPath:   "./custom/path",
-		Verbose:    true,
-		RunPattern: "TestFoo",
+		TestPath:    "./custom/path",
+		Verbose:     true,
+		RunPattern:  "TestFoo",
+		SkipPattern: "FooBar",
 	}
 
 	output := captureStdout(t, func() {
@@ -97,6 +98,7 @@ func TestHandleClear_ResetsAllFields(t *testing.T) {
 	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should be reset to default")
 	assert.False(t, config.GetVerbose(), "Verbose should be reset to false")
 	assert.Equal(t, "", config.GetRunPattern(), "RunPattern should be reset to empty")
+	assert.Equal(t, "", config.GetSkipPattern(), "SkipPattern should be reset to empty")
 	assert.Equal(t, "All parameters cleared\n", output, "Should print cleared message")
 }
 
@@ -247,21 +249,6 @@ func TestHandleHelp_IgnoresArguments(t *testing.T) {
 	})
 
 	assert.Contains(t, output, "Available commands:", "Should display help regardless of arguments")
-}
-
-// TestInitRegistry_RegistersSimpleHandlers tests that initRegistry registers the simple handlers
-func TestInitRegistry_RegistersSimpleHandlers(t *testing.T) {
-	initRegistry()
-
-	// Verify handlers are registered
-	_, hasVerbose := commandRegistry[Command("v")]
-	assert.True(t, hasVerbose, "Should register 'v' command")
-
-	_, hasClear := commandRegistry[Command("clear")]
-	assert.True(t, hasClear, "Should register 'clear' command")
-
-	_, hasHelp := commandRegistry[Command("h")]
-	assert.True(t, hasHelp, "Should register 'help' command")
 }
 
 // TestHandleVerbose_WorksViaRegistry tests verbose command through the registry
@@ -596,68 +583,6 @@ func TestHandleCls_IgnoresArguments(t *testing.T) {
 	assert.Equal(t, "\033[H\033[2J", output, "Should print escape sequence regardless of args")
 }
 
-// TestHandleRun_ReturnsNil tests that run handler is a stub returning nil
-func TestHandleRun_ReturnsNil(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
-
-	err := handleRun(config, []string{})
-	require.NoError(t, err, "Run handler should return nil (stub)")
-}
-
-// TestHandleRun_DoesNotModifyConfig tests that run doesn't change config
-func TestHandleRun_DoesNotModifyConfig(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./custom",
-		Verbose:    true,
-		RunPattern: "TestFoo",
-	}
-
-	originalPath := config.GetTestPath()
-	originalVerbose := config.GetVerbose()
-	originalPattern := config.GetRunPattern()
-
-	err := handleRun(config, []string{})
-	require.NoError(t, err)
-
-	assert.Equal(t, originalPath, config.GetTestPath(), "TestPath should not change")
-	assert.Equal(t, originalVerbose, config.GetVerbose(), "Verbose should not change")
-	assert.Equal(t, originalPattern, config.GetRunPattern(), "RunPattern should not change")
-}
-
-// TestHandleRun_IgnoresArguments tests that run ignores any arguments
-func TestHandleRun_IgnoresArguments(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
-
-	err := handleRun(config, []string{"arg1", "arg2"})
-	require.NoError(t, err, "Should succeed regardless of arguments")
-}
-
-// TestInitRegistry_RegistersParameterHandlers tests that initRegistry registers parameter handlers
-func TestInitRegistry_RegistersParameterHandlers(t *testing.T) {
-	initRegistry()
-
-	// Verify handlers are registered
-	_, hasRunPattern := commandRegistry[Command("r")]
-	assert.True(t, hasRunPattern, "Should register 'r' command")
-
-	_, hasTestPath := commandRegistry[Command("p")]
-	assert.True(t, hasTestPath, "Should register 'p' command")
-
-	_, hasCls := commandRegistry[Command("cls")]
-	assert.True(t, hasCls, "Should register 'cls' command")
-
-	_, hasRun := commandRegistry[Command("f")]
-	assert.True(t, hasRun, "Should register 'f' command")
-}
-
 // TestHandleRunPattern_WorksViaRegistry tests run pattern through the registry
 func TestHandleRunPattern_WorksViaRegistry(t *testing.T) {
 	initRegistry()
@@ -830,14 +755,6 @@ func TestHandleSkipPattern_TogglesMultipleTimes(t *testing.T) {
 	assert.Equal(t, "TestTwo", config.GetSkipPattern())
 }
 
-// TestInitRegistry_RegistersSkipPatternHandler tests that initRegistry registers skip handler
-func TestInitRegistry_RegistersSkipPatternHandler(t *testing.T) {
-	initRegistry()
-
-	_, hasSkipPattern := commandRegistry[Command("s")]
-	assert.True(t, hasSkipPattern, "Should register 's' command")
-}
-
 // TestHandleSkipPattern_WorksViaRegistry tests skip pattern through the registry
 func TestHandleSkipPattern_WorksViaRegistry(t *testing.T) {
 	initRegistry()
@@ -858,23 +775,16 @@ func TestHandleSkipPattern_WorksViaRegistry(t *testing.T) {
 	assert.Equal(t, "Skip pattern: TestViaRegistry\n", output)
 }
 
-// TestHandleClear_ResetsSkipPattern tests that clear resets skip pattern too
-func TestHandleClear_ResetsSkipPattern(t *testing.T) {
-	config := &TestConfig{
-		TestPath:    "./custom/path",
-		Verbose:     true,
-		RunPattern:  "TestFoo",
-		SkipPattern: "TestBar",
-	}
+func TestHandleCommandBase_WithCommand(t *testing.T) {
+	initRegistry()
+
+	config := NewTestConfig()
 
 	output := captureStdout(t, func() {
-		err := handleClear(config, []string{})
+		err := handleCommand(Command("cmd"), config, []string{"grc", "go", "test"})
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should be reset to default")
-	assert.False(t, config.GetVerbose(), "Verbose should be reset to false")
-	assert.Equal(t, "", config.GetRunPattern(), "RunPattern should be reset to empty")
-	assert.Equal(t, "", config.GetSkipPattern(), "SkipPattern should be reset to empty")
-	assert.Equal(t, "All parameters cleared\n", output, "Should print cleared message")
+	assert.Equal(t, []string{"grc", "go", "test"}, config.GetCommandBase())
+	assert.Equal(t, "Test command: grc go test\n", output)
 }

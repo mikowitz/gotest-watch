@@ -11,6 +11,7 @@ type TestConfig struct {
 	Verbose     bool
 	RunPattern  string
 	SkipPattern string
+	CommandBase []string
 	WorkingDir  string // Optional: if set, tests will run in this directory
 }
 
@@ -20,6 +21,7 @@ func NewTestConfig() *TestConfig {
 		Verbose:     false,
 		RunPattern:  "",
 		SkipPattern: "",
+		CommandBase: []string{"go", "test"},
 	}
 }
 
@@ -69,6 +71,12 @@ func (tc *TestConfig) GetSkipPattern() string {
 	return tc.SkipPattern
 }
 
+func (tc *TestConfig) GetCommandBase() []string {
+	tc.mu.RLock()
+	defer tc.mu.RUnlock()
+	return tc.CommandBase
+}
+
 // Safe setters
 func (tc *TestConfig) SetVerbose(v bool) {
 	tc.mu.Lock()
@@ -92,6 +100,12 @@ func (tc *TestConfig) SetSkipPattern(pattern string) {
 	tc.mu.Lock()
 	defer tc.mu.Unlock()
 	tc.SkipPattern = pattern
+}
+
+func (tc *TestConfig) SetCommandBase(commandBase []string) {
+	tc.mu.Lock()
+	defer tc.mu.Unlock()
+	tc.CommandBase = commandBase
 }
 
 func (tc *TestConfig) ToggleVerbose() {

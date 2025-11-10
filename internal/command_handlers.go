@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 func handleVerbose(config *TestConfig, _ []string) error {
@@ -29,7 +30,7 @@ func handleRunPattern(config *TestConfig, args []string) error {
 	}
 	pattern := args[0]
 	config.SetRunPattern(pattern)
-	fmt.Printf("Run pattern: %s\n", pattern)
+	fmt.Println("Run pattern:", pattern)
 	return nil
 }
 
@@ -41,7 +42,7 @@ func handleSkipPattern(config *TestConfig, args []string) error {
 	}
 	pattern := args[0]
 	config.SetSkipPattern(pattern)
-	fmt.Printf("Skip pattern: %s\n", pattern)
+	fmt.Println("Skip pattern:", pattern)
 	return nil
 }
 
@@ -69,10 +70,19 @@ func handleCls(_ *TestConfig, _ []string) error {
 	return nil
 }
 
-func handleRun(_ *TestConfig, _ []string) error {
-	// This handler is no longer used - the force run command is handled
-	// directly in main.go because it needs access to channels
-	// Keeping this for backwards compatibility with tests
+func handleForceRun(_ *TestConfig, _ []string) error {
+	return nil
+}
+
+func handleCommandBase(config *TestConfig, args []string) error {
+	var cmdBase []string
+	if len(args) == 0 {
+		cmdBase = []string{"go", "test"}
+	} else {
+		cmdBase = args
+	}
+	config.SetCommandBase(cmdBase)
+	fmt.Println("Test command:", strings.Join(cmdBase, " "))
 	return nil
 }
 

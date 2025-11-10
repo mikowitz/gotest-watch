@@ -19,7 +19,8 @@ func initRegistry() {
 	commandRegistry[SetSkipCmd] = handleSkipPattern
 	commandRegistry[SetPathCmd] = handleTestPath
 	commandRegistry[ClearScreenCmd] = handleCls
-	commandRegistry[ForceRunCmd] = handleRun
+	commandRegistry[ForceRunCmd] = handleForceRun
+	commandRegistry[SetCommandBaseCmd] = handleCommandBase
 }
 
 func handleCommand(command Command, config *TestConfig, args []string) error {

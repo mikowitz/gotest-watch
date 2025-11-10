@@ -18,6 +18,42 @@ func TestInitRegistry(t *testing.T) {
 	require.NotNil(t, commandRegistry, "initRegistry() did not initialize commandRegistry")
 }
 
+// TestInitRegistry_RegistersSimpleHandlers tests that initRegistry registers the simple handlers
+func TestInitRegistry_RegistersSimpleHandlers(t *testing.T) {
+	initRegistry()
+
+	// Verify handlers are registered
+	_, hasVerbose := commandRegistry[Command("v")]
+	assert.True(t, hasVerbose, "Should register 'v' command")
+
+	_, hasClear := commandRegistry[Command("clear")]
+	assert.True(t, hasClear, "Should register 'clear' command")
+
+	_, hasHelp := commandRegistry[Command("h")]
+	assert.True(t, hasHelp, "Should register 'help' command")
+}
+
+// TestInitRegistry_RegistersParameterHandlers tests that initRegistry registers parameter handlers
+func TestInitRegistry_RegistersParameterHandlers(t *testing.T) {
+	initRegistry()
+
+	// Verify handlers are registered
+	_, hasRunPattern := commandRegistry[Command("r")]
+	assert.True(t, hasRunPattern, "Should register 'r' command")
+
+	_, hasTestPath := commandRegistry[Command("p")]
+	assert.True(t, hasTestPath, "Should register 'p' command")
+
+	_, hasCls := commandRegistry[Command("cls")]
+	assert.True(t, hasCls, "Should register 'cls' command")
+
+	_, hasSkipPattern := commandRegistry[Command("s")]
+	assert.True(t, hasSkipPattern, "Should register 's' command")
+
+	_, hasCommandBase := commandRegistry[Command("cmd")]
+	assert.True(t, hasCommandBase, "Should register 'cmd' command")
+}
+
 // Test that handleCommand returns an error for unknown commands
 func TestHandleCommand_UnknownCommand(t *testing.T) {
 	initRegistry()
