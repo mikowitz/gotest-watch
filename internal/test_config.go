@@ -115,12 +115,6 @@ func (tc *TestConfig) SetCommandBase(commandBase []string) {
 	tc.CommandBase = commandBase
 }
 
-func (tc *TestConfig) SetRace(r bool) {
-	tc.Lock()
-	defer tc.Unlock()
-	tc.Race = r
-}
-
 func (tc *TestConfig) ToggleVerbose() {
 	tc.Lock()
 	defer tc.Unlock()
