@@ -33,14 +33,14 @@ but this can be changed by passing one of the following interactive commands:
 
 ### Interactive Commands
 
-* `v` - toggle verbose mode on and off (the `-v` flag)
-* `r <pattern>` - run tests whose names match the given pattern (the `-run` flag)
+* `v` - toggle verbose mode on and off (equivalent to the `-v` flag)
+* `r <pattern>` - run tests whose names match the given pattern (equivalent to the `-run` flag)
 * `r` - clears any previously set pattern
-* `s <pattern>` - skips tests whose names match the given pattern (the `-skip` flag)
+* `s <pattern>` - skips tests whose names match the given pattern (equivalent to the `-skip` flag)
 * `s` - clears any previously set skip pattern
 * `p <pattern>` - runs tests under the given path
 * `p` - sets the given path to `./...` (runs all tests)
 * `clear` - clears all set parameters, returns to running `go test ./...`
 * `cls` - clear the terminal window
 * `f` - force a run of the tests, using the currently set configuration
-* `help` - displays these options
+* `help` - print out the interactive command options
