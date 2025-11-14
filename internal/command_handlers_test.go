@@ -531,56 +531,24 @@ func TestHandleTestPath_IgnoresExtraArgs(t *testing.T) {
 	assert.Equal(t, "Test path: "+tempDir+"\n", output, "Should print first argument")
 }
 
-// TestHandleCls_PrintsAnsiEscapeSequence tests cls prints correct escape sequence
-func TestHandleCls_PrintsAnsiEscapeSequence(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+func TestHandleCls_UpdatesConfig(t *testing.T) {
+	config := NewTestConfig()
 
-	output := captureStdout(t, func() {
-		err := handleCls(config, []string{})
-		require.NoError(t, err)
-	})
-
-	assert.Equal(t, "\033[H\033[2J", output, "Should print ANSI escape sequence")
-}
-
-// TestHandleCls_DoesNotModifyConfig tests that cls doesn't change config
-func TestHandleCls_DoesNotModifyConfig(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./custom",
-		Verbose:    true,
-		RunPattern: "TestFoo",
-	}
-
-	originalPath := config.GetTestPath()
-	originalVerbose := config.GetVerbose()
-	originalPattern := config.GetRunPattern()
+	clearA := config.GetClearScreen()
 
 	err := handleCls(config, []string{})
 	require.NoError(t, err)
 
-	assert.Equal(t, originalPath, config.GetTestPath(), "TestPath should not change")
-	assert.Equal(t, originalVerbose, config.GetVerbose(), "Verbose should not change")
-	assert.Equal(t, originalPattern, config.GetRunPattern(), "RunPattern should not change")
-}
+	clearB := config.GetClearScreen()
 
-// TestHandleCls_IgnoresArguments tests that cls ignores any arguments
-func TestHandleCls_IgnoresArguments(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	err = handleCls(config, []string{})
+	require.NoError(t, err)
 
-	output := captureStdout(t, func() {
-		err := handleCls(config, []string{"arg1", "arg2"})
-		require.NoError(t, err)
-	})
+	clearC := config.GetClearScreen()
 
-	assert.Equal(t, "\033[H\033[2J", output, "Should print escape sequence regardless of args")
+	assert.False(t, clearA, "initial config should not clear screen before test runs")
+	assert.True(t, clearB, "handling the command should toggle clearing the screen")
+	assert.False(t, clearC, "handling the command should toggle clearing the screen")
 }
 
 // TestHandleRunPattern_WorksViaRegistry tests run pattern through the registry
@@ -637,7 +605,7 @@ func TestHandleCls_WorksViaRegistry(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "\033[H\033[2J", output)
+	assert.Equal(t, "Clear screen before each run: enabled\n", output)
 }
 
 // TestHandleRun_WorksViaRegistry tests run through the registry

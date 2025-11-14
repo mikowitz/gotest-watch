@@ -52,6 +52,10 @@ func RunTests(
 		fmt.Fprintln(os.Stderr, "Error: config not found in context")
 		return
 	}
+
+	if config.GetClearScreen() {
+		fmt.Print("\x1b[H\x1b[2J")
+	}
 	testCommand := config.BuildCommand()
 	fields := strings.Fields(testCommand)
 

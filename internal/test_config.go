@@ -16,6 +16,7 @@ type TestConfig struct {
 	Race        bool
 	FailFast    bool
 	Count       int
+	ClearScreen bool
 	WorkingDir  string // Optional: if set, tests will run in this directory
 }
 
@@ -62,6 +63,12 @@ func (tc *TestConfig) GetVerbose() bool {
 	tc.RLock()
 	defer tc.RUnlock()
 	return tc.Verbose
+}
+
+func (tc *TestConfig) GetClearScreen() bool {
+	tc.RLock()
+	defer tc.RUnlock()
+	return tc.ClearScreen
 }
 
 func (tc *TestConfig) GetTestPath() string {
@@ -147,6 +154,12 @@ func (tc *TestConfig) ToggleVerbose() {
 	tc.Lock()
 	defer tc.Unlock()
 	tc.Verbose = !tc.Verbose
+}
+
+func (tc *TestConfig) ToggleClearScreen() {
+	tc.Lock()
+	defer tc.Unlock()
+	tc.ClearScreen = !tc.ClearScreen
 }
 
 func (tc *TestConfig) ToggleRace() {

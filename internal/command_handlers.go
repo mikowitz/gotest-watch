@@ -114,8 +114,13 @@ func handleTestPath(config *TestConfig, args []string) error {
 	return nil
 }
 
-func handleCls(_ *TestConfig, _ []string) error {
-	fmt.Print("\x1b[H\x1b[2J")
+func handleCls(config *TestConfig, _ []string) error {
+	config.ToggleClearScreen()
+	if config.GetClearScreen() {
+		fmt.Println("Clear screen before each run: enabled")
+	} else {
+		fmt.Println("Clear screen before each run: disabled")
+	}
 	return nil
 }
 
