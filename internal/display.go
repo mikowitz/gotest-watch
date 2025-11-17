@@ -10,5 +10,5 @@ func displayPrompt() {
 }
 
 func displayCommand(command []string) {
-	fmt.Println("go", strings.Join(command, " "))
+	fmt.Println(strings.Join(command, " "))
 }

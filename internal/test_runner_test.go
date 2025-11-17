@@ -64,7 +64,7 @@ func TestStreamOutput_ReadsAllLines(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	streamOutput(scanner, &output, &wg)
+	streamOutput(scanner, &output, &wg, false)
 
 	assert.Equal(t, "line1\nline2\nline3\n", output.String(), "should write all lines to output")
 }
@@ -78,7 +78,7 @@ func TestStreamOutput_CallsWaitGroupDone(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	streamOutput(scanner, &output, &wg)
+	streamOutput(scanner, &output, &wg, false)
 
 	// This should not block if wg.Done() was called
 	done := make(chan struct{})
@@ -104,7 +104,7 @@ func TestStreamOutput_HandlesEmptyInput(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	streamOutput(scanner, &output, &wg)
+	streamOutput(scanner, &output, &wg, false)
 
 	assert.Equal(t, "", output.String(), "should handle empty input")
 }
@@ -119,7 +119,7 @@ func TestStreamOutput_PreservesLineContent(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	streamOutput(scanner, &output, &wg)
+	streamOutput(scanner, &output, &wg, false)
 
 	assert.Equal(t, input, output.String(), "should preserve exact line content including special characters")
 }
@@ -388,7 +388,7 @@ func TestStreamOutput_HandlesScannerError(t *testing.T) {
 	_ = pw.Close()
 
 	// Should complete without panic even with error
-	streamOutput(scanner, &output, &wg)
+	streamOutput(scanner, &output, &wg, false)
 
 	// Should still call wg.Done()
 	done := make(chan struct{})
@@ -415,7 +415,7 @@ func TestStreamOutput_WritesLineByLine(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	streamOutput(scanner, &output, &wg)
+	streamOutput(scanner, &output, &wg, false)
 
 	lines := strings.Split(output.String(), "\n")
 	// Should have at least 3 lines (plus possible empty line at end)
@@ -592,9 +592,9 @@ func TestStreamOutput_ConcurrentSafety(t *testing.T) {
 	scanner3 := bufio.NewScanner(reader3)
 
 	// Run multiple streamOutput calls concurrently
-	go streamOutput(scanner1, &output1, &wg)
-	go streamOutput(scanner2, &output2, &wg)
-	go streamOutput(scanner3, &output3, &wg)
+	go streamOutput(scanner1, &output1, &wg, false)
+	go streamOutput(scanner2, &output2, &wg, false)
+	go streamOutput(scanner3, &output3, &wg, false)
 
 	// Wait for all to complete
 	done := make(chan struct{})

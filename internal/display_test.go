@@ -36,28 +36,28 @@ func TestDisplayCommand_OutputFormat(t *testing.T) {
 	}{
 		{
 			name:     "simple command",
-			args:     []string{"test", "./..."},
+			args:     []string{"go", "test", "./..."},
 			expected: "go test ./...\n",
 		},
 		{
 			name:     "command with single flag",
-			args:     []string{"test", "-v", "./..."},
+			args:     []string{"go", "test", "-v", "./..."},
 			expected: "go test -v ./...\n",
 		},
 		{
 			name:     "command with multiple flags",
-			args:     []string{"test", "-v", "-race", "-run=TestFoo", "./..."},
+			args:     []string{"go", "test", "-v", "-race", "-run=TestFoo", "./..."},
 			expected: "go test -v -race -run=TestFoo ./...\n",
 		},
 		{
 			name:     "command with only subcommand",
-			args:     []string{"test"},
+			args:     []string{"go", "test"},
 			expected: "go test\n",
 		},
 		{
 			name:     "empty args",
 			args:     []string{},
-			expected: "go \n",
+			expected: "\n",
 		},
 	}
 
@@ -109,7 +109,7 @@ func TestDisplayCommand_DoesNotPanic(t *testing.T) {
 // TestDisplayCommand_JoinsWithSpaces tests that displayCommand joins args with spaces
 func TestDisplayCommand_JoinsWithSpaces(t *testing.T) {
 	actual := captureStdout(t, func() {
-		displayCommand([]string{"test", "-v", "-race", "./..."})
+		displayCommand([]string{"go", "test", "-v", "-race", "./..."})
 	})
 
 	// Verify spaces between each part
@@ -119,7 +119,7 @@ func TestDisplayCommand_JoinsWithSpaces(t *testing.T) {
 // TestDisplayCommand_PrintsToStdout tests that displayCommand writes to stdout, not stderr
 func TestDisplayCommand_PrintsToStdout(t *testing.T) {
 	actual := captureStdout(t, func() {
-		displayCommand([]string{"test", "./..."})
+		displayCommand([]string{"go", "test", "./..."})
 	})
 
 	// Should write to stdout, not stderr
@@ -145,22 +145,22 @@ func TestDisplayCommand_WithRealCommandFormat(t *testing.T) {
 	}{
 		{
 			name:     "test with verbose",
-			args:     []string{"test", "-v", "./..."},
+			args:     []string{"go", "test", "-v", "./..."},
 			contains: "go test -v ./...",
 		},
 		{
 			name:     "test with pattern",
-			args:     []string{"test", "-run=TestFoo", "./..."},
+			args:     []string{"go", "test", "-run=TestFoo", "./..."},
 			contains: "go test -run=TestFoo ./...",
 		},
 		{
 			name:     "test with verbose and pattern",
-			args:     []string{"test", "-v", "-run=TestBar", "./..."},
+			args:     []string{"go", "test", "-v", "-run=TestBar", "./..."},
 			contains: "go test -v -run=TestBar ./...",
 		},
 		{
 			name:     "test with specific path",
-			args:     []string{"test", "./pkg/..."},
+			args:     []string{"go", "test", "./pkg/..."},
 			contains: "go test ./pkg/...",
 		},
 	}

@@ -25,6 +25,7 @@ func initRegistry() {
 	commandRegistry[FailFastCmd] = handleFailFast
 	commandRegistry[CountCmd] = handleCount
 	commandRegistry[CoverCmd] = handleCover
+	commandRegistry[ColorCmd] = handleColor
 }
 
 func handleCommand(command Command, config *TestConfig, args []string) error {

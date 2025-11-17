@@ -12,7 +12,7 @@ import (
 	"sync"
 )
 
-func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup) {
+func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup, colorize bool) {
 	defer wg.Done()
 
 	for r.Scan() {
@@ -21,7 +21,23 @@ func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup) {
 			log.Println(err)
 			return
 		}
-		_, err = w.Write([]byte(r.Text()))
+
+		output := r.Text()
+		if colorize {
+			var colorizer string
+			reset := "\033[0m"
+			if strings.HasPrefix(output, "?") || strings.Contains(output, "SKIP") || strings.HasPrefix(output, "=== RUN") {
+				colorizer = "\033[33;1m"
+			}
+			if strings.HasPrefix(output, "ok") || strings.Contains(output, "PASS") {
+				colorizer = "\033[32;1m"
+			}
+			if strings.HasPrefix(output, "FAIL") {
+				colorizer = "\033[31;1m"
+			}
+			output = fmt.Sprintf("%s%s%s", colorizer, output, reset)
+		}
+		_, err = w.Write([]byte(output))
 		if err != nil {
 			log.Println(err)
 		}
@@ -59,7 +75,7 @@ func RunTests(
 	testCommand := config.BuildCommand()
 	fields := strings.Fields(testCommand)
 
-	displayCommand(fields[1:])
+	displayCommand(fields)
 
 	// Use CommandContext to support cancellation via context
 	//nolint:gosec // TODO: sanitize input
@@ -69,6 +85,8 @@ func RunTests(
 	if config.WorkingDir != "" {
 		cmd.Dir = config.WorkingDir
 	}
+
+	colorize := config.GetColor()
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -93,12 +111,12 @@ func RunTests(
 
 	go func() {
 		r := bufio.NewScanner(stdout)
-		streamOutput(r, stdoutWriter, &wg)
+		streamOutput(r, stdoutWriter, &wg, colorize)
 	}()
 
 	go func() {
 		r := bufio.NewScanner(stderr)
-		streamOutput(r, stderrWriter, &wg)
+		streamOutput(r, stderrWriter, &wg, colorize)
 	}()
 
 	wg.Wait()

@@ -18,6 +18,7 @@ type TestConfig struct {
 	Count       int
 	ClearScreen bool
 	Cover       bool
+	Color       bool
 	WorkingDir  string // Optional: if set, tests will run in this directory
 }
 
@@ -123,6 +124,12 @@ func (tc *TestConfig) GetCover() bool {
 	return tc.Cover
 }
 
+func (tc *TestConfig) GetColor() bool {
+	tc.RLock()
+	defer tc.RUnlock()
+	return tc.Color
+}
+
 // Safe setters
 func (tc *TestConfig) SetVerbose(v bool) {
 	tc.Lock()
@@ -190,6 +197,12 @@ func (tc *TestConfig) ToggleCover() {
 	tc.Cover = !tc.Cover
 }
 
+func (tc *TestConfig) ToggleColor() {
+	tc.Lock()
+	defer tc.Unlock()
+	tc.Color = !tc.Color
+}
+
 func (tc *TestConfig) Clear() {
 	tc.Lock()
 	defer tc.Unlock()
@@ -202,4 +215,5 @@ func (tc *TestConfig) Clear() {
 	tc.FailFast = false
 	tc.Count = 0
 	tc.Cover = false
+	tc.Color = false
 }
