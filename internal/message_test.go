@@ -45,7 +45,7 @@ func TestNewCommandMessage(t *testing.T) {
 		m := NewCommandMessage(VerboseCmd, []string{})
 
 		assert.Equal(t, VerboseCmd, m.Command, "expected verbose command to have command type VerboseCmd")
-		assert.NotEmpty(t, m.Args, "expected verbose command to have no args")
+		assert.Empty(t, m.Args, "expected verbose command to have no args")
 	})
 
 	t.Run("set path with single path", func(t *testing.T) {
