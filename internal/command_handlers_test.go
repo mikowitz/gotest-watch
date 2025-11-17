@@ -84,9 +84,10 @@ func TestHandleVerbose_IgnoresArguments(t *testing.T) {
 // TestHandleClear_ResetsAllFields tests that handleClear resets all config fields
 func TestHandleClear_ResetsAllFields(t *testing.T) {
 	config := &TestConfig{
-		TestPath:   "./custom/path",
-		Verbose:    true,
-		RunPattern: "TestFoo",
+		TestPath:    "./custom/path",
+		Verbose:     true,
+		RunPattern:  "TestFoo",
+		SkipPattern: "FooBar",
 	}
 
 	output := captureStdout(t, func() {
@@ -97,6 +98,7 @@ func TestHandleClear_ResetsAllFields(t *testing.T) {
 	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should be reset to default")
 	assert.False(t, config.GetVerbose(), "Verbose should be reset to false")
 	assert.Equal(t, "", config.GetRunPattern(), "RunPattern should be reset to empty")
+	assert.Equal(t, "", config.GetSkipPattern(), "SkipPattern should be reset to empty")
 	assert.Equal(t, "All parameters cleared\n", output, "Should print cleared message")
 }
 
@@ -247,21 +249,6 @@ func TestHandleHelp_IgnoresArguments(t *testing.T) {
 	})
 
 	assert.Contains(t, output, "Available commands:", "Should display help regardless of arguments")
-}
-
-// TestInitRegistry_RegistersSimpleHandlers tests that initRegistry registers the simple handlers
-func TestInitRegistry_RegistersSimpleHandlers(t *testing.T) {
-	initRegistry()
-
-	// Verify handlers are registered
-	_, hasVerbose := commandRegistry[Command("v")]
-	assert.True(t, hasVerbose, "Should register 'v' command")
-
-	_, hasClear := commandRegistry[Command("clear")]
-	assert.True(t, hasClear, "Should register 'clear' command")
-
-	_, hasHelp := commandRegistry[Command("h")]
-	assert.True(t, hasHelp, "Should register 'help' command")
 }
 
 // TestHandleVerbose_WorksViaRegistry tests verbose command through the registry
@@ -468,7 +455,7 @@ func TestHandleTestPath_WithNoArgs(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should not change on error")
+	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should reset on blank input")
 	assert.Equal(t, "Test path: ./...\n", output, "Should print path message")
 }
 
@@ -485,7 +472,7 @@ func TestHandleTestPath_WithNilArgs(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should not change on error")
+	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should reset on nil input")
 	assert.Equal(t, "Test path: ./...\n", output, "Should print path message")
 }
 
@@ -544,118 +531,24 @@ func TestHandleTestPath_IgnoresExtraArgs(t *testing.T) {
 	assert.Equal(t, "Test path: "+tempDir+"\n", output, "Should print first argument")
 }
 
-// TestHandleCls_PrintsAnsiEscapeSequence tests cls prints correct escape sequence
-func TestHandleCls_PrintsAnsiEscapeSequence(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+func TestHandleCls_UpdatesConfig(t *testing.T) {
+	config := NewTestConfig()
 
-	output := captureStdout(t, func() {
-		err := handleCls(config, []string{})
-		require.NoError(t, err)
-	})
-
-	assert.Equal(t, "\033[H\033[2J", output, "Should print ANSI escape sequence")
-}
-
-// TestHandleCls_DoesNotModifyConfig tests that cls doesn't change config
-func TestHandleCls_DoesNotModifyConfig(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./custom",
-		Verbose:    true,
-		RunPattern: "TestFoo",
-	}
-
-	originalPath := config.GetTestPath()
-	originalVerbose := config.GetVerbose()
-	originalPattern := config.GetRunPattern()
+	clearA := config.GetClearScreen()
 
 	err := handleCls(config, []string{})
 	require.NoError(t, err)
 
-	assert.Equal(t, originalPath, config.GetTestPath(), "TestPath should not change")
-	assert.Equal(t, originalVerbose, config.GetVerbose(), "Verbose should not change")
-	assert.Equal(t, originalPattern, config.GetRunPattern(), "RunPattern should not change")
-}
+	clearB := config.GetClearScreen()
 
-// TestHandleCls_IgnoresArguments tests that cls ignores any arguments
-func TestHandleCls_IgnoresArguments(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
-
-	output := captureStdout(t, func() {
-		err := handleCls(config, []string{"arg1", "arg2"})
-		require.NoError(t, err)
-	})
-
-	assert.Equal(t, "\033[H\033[2J", output, "Should print escape sequence regardless of args")
-}
-
-// TestHandleRun_ReturnsNil tests that run handler is a stub returning nil
-func TestHandleRun_ReturnsNil(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
-
-	err := handleRun(config, []string{})
-	require.NoError(t, err, "Run handler should return nil (stub)")
-}
-
-// TestHandleRun_DoesNotModifyConfig tests that run doesn't change config
-func TestHandleRun_DoesNotModifyConfig(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./custom",
-		Verbose:    true,
-		RunPattern: "TestFoo",
-	}
-
-	originalPath := config.GetTestPath()
-	originalVerbose := config.GetVerbose()
-	originalPattern := config.GetRunPattern()
-
-	err := handleRun(config, []string{})
+	err = handleCls(config, []string{})
 	require.NoError(t, err)
 
-	assert.Equal(t, originalPath, config.GetTestPath(), "TestPath should not change")
-	assert.Equal(t, originalVerbose, config.GetVerbose(), "Verbose should not change")
-	assert.Equal(t, originalPattern, config.GetRunPattern(), "RunPattern should not change")
-}
+	clearC := config.GetClearScreen()
 
-// TestHandleRun_IgnoresArguments tests that run ignores any arguments
-func TestHandleRun_IgnoresArguments(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
-
-	err := handleRun(config, []string{"arg1", "arg2"})
-	require.NoError(t, err, "Should succeed regardless of arguments")
-}
-
-// TestInitRegistry_RegistersParameterHandlers tests that initRegistry registers parameter handlers
-func TestInitRegistry_RegistersParameterHandlers(t *testing.T) {
-	initRegistry()
-
-	// Verify handlers are registered
-	_, hasRunPattern := commandRegistry[Command("r")]
-	assert.True(t, hasRunPattern, "Should register 'r' command")
-
-	_, hasTestPath := commandRegistry[Command("p")]
-	assert.True(t, hasTestPath, "Should register 'p' command")
-
-	_, hasCls := commandRegistry[Command("cls")]
-	assert.True(t, hasCls, "Should register 'cls' command")
-
-	_, hasRun := commandRegistry[Command("f")]
-	assert.True(t, hasRun, "Should register 'f' command")
+	assert.False(t, clearA, "initial config should not clear screen before test runs")
+	assert.True(t, clearB, "handling the command should toggle clearing the screen")
+	assert.False(t, clearC, "handling the command should toggle clearing the screen")
 }
 
 // TestHandleRunPattern_WorksViaRegistry tests run pattern through the registry
@@ -712,7 +605,7 @@ func TestHandleCls_WorksViaRegistry(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "\033[H\033[2J", output)
+	assert.Equal(t, "Clear screen before each run: enabled\n", output)
 }
 
 // TestHandleRun_WorksViaRegistry tests run through the registry
@@ -830,14 +723,6 @@ func TestHandleSkipPattern_TogglesMultipleTimes(t *testing.T) {
 	assert.Equal(t, "TestTwo", config.GetSkipPattern())
 }
 
-// TestInitRegistry_RegistersSkipPatternHandler tests that initRegistry registers skip handler
-func TestInitRegistry_RegistersSkipPatternHandler(t *testing.T) {
-	initRegistry()
-
-	_, hasSkipPattern := commandRegistry[Command("s")]
-	assert.True(t, hasSkipPattern, "Should register 's' command")
-}
-
 // TestHandleSkipPattern_WorksViaRegistry tests skip pattern through the registry
 func TestHandleSkipPattern_WorksViaRegistry(t *testing.T) {
 	initRegistry()
@@ -858,23 +743,432 @@ func TestHandleSkipPattern_WorksViaRegistry(t *testing.T) {
 	assert.Equal(t, "Skip pattern: TestViaRegistry\n", output)
 }
 
-// TestHandleClear_ResetsSkipPattern tests that clear resets skip pattern too
-func TestHandleClear_ResetsSkipPattern(t *testing.T) {
-	config := &TestConfig{
-		TestPath:    "./custom/path",
-		Verbose:     true,
-		RunPattern:  "TestFoo",
-		SkipPattern: "TestBar",
-	}
+func TestHandleCommandBase_WithCommand(t *testing.T) {
+	initRegistry()
+
+	config := NewTestConfig()
 
 	output := captureStdout(t, func() {
-		err := handleClear(config, []string{})
+		err := handleCommand(Command("cmd"), config, []string{"grc", "go", "test"})
 		require.NoError(t, err)
 	})
 
-	assert.Equal(t, "./...", config.GetTestPath(), "TestPath should be reset to default")
-	assert.False(t, config.GetVerbose(), "Verbose should be reset to false")
-	assert.Equal(t, "", config.GetRunPattern(), "RunPattern should be reset to empty")
-	assert.Equal(t, "", config.GetSkipPattern(), "SkipPattern should be reset to empty")
-	assert.Equal(t, "All parameters cleared\n", output, "Should print cleared message")
+	assert.Equal(t, []string{"grc", "go", "test"}, config.GetCommandBase())
+	assert.Equal(t, "Test command: grc go test\n", output)
+}
+
+func TestHandleCommandBase_WithEmptyArgs(t *testing.T) {
+	initRegistry()
+
+	config := NewTestConfig()
+
+	output := captureStdout(t, func() {
+		err := handleCommand(Command("cmd"), config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, []string{"go", "test"}, config.GetCommandBase(), "command base resets on blank input")
+	assert.Equal(t, "Test command: go test\n", output)
+}
+
+func TestHandleCommandBase_WithNilArgs(t *testing.T) {
+	initRegistry()
+
+	config := NewTestConfig()
+
+	output := captureStdout(t, func() {
+		err := handleCommand(Command("cmd"), config, nil)
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, []string{"go", "test"}, config.GetCommandBase(), "command base resets on blank input")
+	assert.Equal(t, "Test command: go test\n", output)
+}
+
+func TestHandleRace_TogglesFromFalseToTrue(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Race:       false,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleRace(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.True(t, config.GetRace(), "Race should be toggled to true")
+	assert.Equal(t, "Race: enabled\n", output, "Should print enabled message")
+}
+
+// TestHandleRace_TogglesFromTrueToFalse tests verbose toggle from true to false
+func TestHandleRace_TogglesFromTrueToFalse(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Race:       true,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleRace(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.False(t, config.GetRace(), "Race should be toggled to false")
+	assert.Equal(t, "Race: disabled\n", output, "Should print disabled message")
+}
+
+// TestHandleRace_TogglesMultipleTimes tests verbose toggle multiple times
+func TestHandleRace_TogglesMultipleTimes(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Race:       false,
+		RunPattern: "",
+	}
+
+	// Toggle on
+	err := handleRace(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetRace())
+
+	// Toggle off
+	err = handleRace(config, []string{})
+	require.NoError(t, err)
+	assert.False(t, config.GetRace())
+
+	// Toggle on again
+	err = handleRace(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetRace())
+}
+
+// TestHandleRace_IgnoresArguments tests that handleRace ignores any arguments
+func TestHandleRace_IgnoresArguments(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Race:       false,
+		RunPattern: "",
+	}
+
+	err := handleRace(config, []string{"arg1", "arg2"})
+	require.NoError(t, err)
+	assert.True(t, config.GetRace(), "Should toggle regardless of arguments")
+}
+
+func TestHandleFailFast_TogglesFromFalseToTrue(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		FailFast:   false,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleFailFast(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.True(t, config.GetFailFast(), "FailFast should be toggled to true")
+	assert.Equal(t, "FailFast: enabled\n", output, "Should print enabled message")
+}
+
+func TestHandleFailFast_TogglesFromTrueToFalse(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		FailFast:   true,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleFailFast(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.False(t, config.GetFailFast(), "FailFast should be toggled to false")
+	assert.Equal(t, "FailFast: disabled\n", output, "Should print disabled message")
+}
+
+func TestHandleFailFast_TogglesMultipleTimes(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		FailFast:   false,
+		RunPattern: "",
+	}
+
+	// Toggle on
+	err := handleFailFast(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetFailFast())
+
+	// Toggle off
+	err = handleFailFast(config, []string{})
+	require.NoError(t, err)
+	assert.False(t, config.GetFailFast())
+
+	// Toggle on again
+	err = handleFailFast(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetFailFast())
+}
+
+func TestHandleFailFast_IgnoresArguments(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		FailFast:   false,
+		RunPattern: "",
+	}
+
+	err := handleFailFast(config, []string{"arg1", "arg2"})
+	require.NoError(t, err)
+	assert.True(t, config.GetFailFast(), "Should toggle regardless of arguments")
+}
+
+func TestHandleCount_WithValidPositiveNumber(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    0,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{"5"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 5, config.GetCount(), "Should set count to 5")
+	assert.Equal(t, "Count: 5\n", output, "Should print count message")
+}
+
+func TestHandleCount_WithZero(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    10,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{"0"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 0, config.GetCount(), "Should set count to 0")
+	assert.Equal(t, "Count: cleared\n", output, "Should print cleared message")
+}
+
+func TestHandleCount_WithoutArgs(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    10,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 0, config.GetCount(), "Should clear count")
+	assert.Equal(t, "Count: cleared\n", output, "Should print cleared message")
+}
+
+func TestHandleCount_WithNilArgs(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    10,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, nil)
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 0, config.GetCount(), "Should clear count with nil args")
+	assert.Equal(t, "Count: cleared\n", output, "Should print cleared message")
+}
+
+func TestHandleCount_WithNegativeNumber(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    5,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{"-5"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 5, config.GetCount(), "Count should remain unchanged")
+	assert.Contains(t, output, "Error: count value must be non-negative (got -5)", "Should print error message")
+}
+
+func TestHandleCount_WithInvalidString(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    5,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{"abc"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 5, config.GetCount(), "Count should remain unchanged")
+	assert.Contains(t, output, "Error: invalid count value", "Should print error message")
+	assert.Contains(t, output, "must be a non-negative integer", "Should explain requirement")
+}
+
+func TestHandleCount_WithFloat(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    5,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{"3.14"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 5, config.GetCount(), "Count should remain unchanged")
+	assert.Contains(t, output, "Error: invalid count value", "Should print error message")
+}
+
+func TestHandleCount_WithEmptyString(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    5,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{""})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 5, config.GetCount(), "Count should remain unchanged")
+	assert.Contains(t, output, "Error: invalid count value", "Should print error message")
+}
+
+func TestHandleCount_WithMultipleArgs(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    0,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCount(config, []string{"10", "20", "30"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 10, config.GetCount(), "Should use only first argument")
+	assert.Equal(t, "Count: 10\n", output, "Should print first argument")
+}
+
+func TestHandleCount_TogglesMultipleTimes(t *testing.T) {
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    0,
+	}
+
+	// Set to 5
+	err := handleCount(config, []string{"5"})
+	require.NoError(t, err)
+	assert.Equal(t, 5, config.GetCount())
+
+	// Change to 10
+	err = handleCount(config, []string{"10"})
+	require.NoError(t, err)
+	assert.Equal(t, 10, config.GetCount())
+
+	// Clear
+	err = handleCount(config, []string{})
+	require.NoError(t, err)
+	assert.Equal(t, 0, config.GetCount())
+
+	// Set to 3
+	err = handleCount(config, []string{"3"})
+	require.NoError(t, err)
+	assert.Equal(t, 3, config.GetCount())
+}
+
+func TestHandleCount_WorksViaRegistry(t *testing.T) {
+	initRegistry()
+
+	config := &TestConfig{
+		TestPath: "./...",
+		Count:    0,
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCommand(Command("count"), config, []string{"7"})
+		require.NoError(t, err)
+	})
+
+	assert.Equal(t, 7, config.GetCount())
+	assert.Equal(t, "Count: 7\n", output)
+}
+
+// ============================================================================
+// Cover Toggle Tests
+// ============================================================================
+
+func TestHandleCover_TogglesFromFalseToTrue(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Cover:      false,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCover(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.True(t, config.GetCover(), "Cover should be toggled to true")
+	assert.Equal(t, "Cover: enabled\n", output, "Should print enabled message")
+}
+
+func TestHandleCover_TogglesFromTrueToFalse(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Cover:      true,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCover(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.False(t, config.GetCover(), "Cover should be toggled to false")
+	assert.Equal(t, "Cover: disabled\n", output, "Should print disabled message")
+}
+
+func TestHandleCover_TogglesMultipleTimes(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Cover:      false,
+		RunPattern: "",
+	}
+
+	// Toggle on
+	err := handleCover(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetCover())
+
+	// Toggle off
+	err = handleCover(config, []string{})
+	require.NoError(t, err)
+	assert.False(t, config.GetCover())
+
+	// Toggle on again
+	err = handleCover(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetCover())
+}
+
+func TestHandleCover_IgnoresArguments(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Cover:      false,
+		RunPattern: "",
+	}
+
+	err := handleCover(config, []string{"arg1", "arg2"})
+	require.NoError(t, err)
+	assert.True(t, config.GetCover(), "Should toggle regardless of arguments")
 }

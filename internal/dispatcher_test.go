@@ -10,11 +10,7 @@ import (
 
 // TestDispatcher_FileChangeSpawnsTestRunner tests that FileChangeMessage spawns test runner
 func TestDispatcher_FileChangeSpawnsTestRunner(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	config := NewTestConfig()
 
 	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
@@ -47,11 +43,7 @@ func TestDispatcher_FileChangeSpawnsTestRunner(t *testing.T) {
 
 // TestDispatcher_FileChangeIgnoredWhenTestRunning tests that FileChangeMessage ignored when testRunning=true
 func TestDispatcher_FileChangeIgnoredWhenTestRunning(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	config := NewTestConfig()
 
 	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
@@ -94,11 +86,7 @@ func TestDispatcher_FileChangeIgnoredWhenTestRunning(t *testing.T) {
 func TestDispatcher_CommandMessageCallsHandler(t *testing.T) {
 	initRegistry()
 
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	config := NewTestConfig()
 
 	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
@@ -125,11 +113,7 @@ func TestDispatcher_CommandMessageCallsHandler(t *testing.T) {
 
 // TestDispatcher_CommandMessageSpawnsTestRunner tests that CommandMessage spawns test runner
 func TestDispatcher_CommandMessageSpawnsTestRunner(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	config := NewTestConfig()
 
 	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
@@ -159,11 +143,7 @@ func TestDispatcher_CommandMessageSpawnsTestRunner(t *testing.T) {
 
 // TestDispatcher_CommandMessageIgnoredWhenTestRunning tests that CommandMessage ignored when testRunning=true
 func TestDispatcher_CommandMessageIgnoredWhenTestRunning(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	config := NewTestConfig()
 
 	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
@@ -202,11 +182,7 @@ func TestDispatcher_CommandMessageIgnoredWhenTestRunning(t *testing.T) {
 
 // TestDispatcher_HelpMessageDoesNotSpawnTestRunner tests that HelpMessage doesn't spawn test runner
 func TestDispatcher_HelpMessageDoesNotSpawnTestRunner(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	config := NewTestConfig()
 
 	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
@@ -233,11 +209,7 @@ func TestDispatcher_HelpMessageDoesNotSpawnTestRunner(t *testing.T) {
 
 // TestDispatcher_TestCompleteMessageUpdatesState tests TestCompleteMesSage updates state
 func TestDispatcher_TestCompleteMessageUpdatesState(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	config := NewTestConfig()
 
 	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()
@@ -282,11 +254,7 @@ func TestDispatcher_TestCompleteMessageUpdatesState(t *testing.T) {
 
 // TestDispatcher_ContextDoneExitsGracefully tests ctx.Done() causes graceful shutdown
 func TestDispatcher_ContextDoneExitsGracefully(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	config := NewTestConfig()
 
 	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 
@@ -320,11 +288,7 @@ func TestDispatcher_ContextDoneExitsGracefully(t *testing.T) {
 
 // TestDispatcher_StateTransitions tests state transitions between idle and running
 func TestDispatcher_StateTransitions(t *testing.T) {
-	config := &TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	config := NewTestConfig()
 
 	ctx, cancel := context.WithCancel(WithConfig(context.Background(), config))
 	defer cancel()

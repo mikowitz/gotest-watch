@@ -3,6 +3,8 @@ package internal
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func handleVerbose(config *TestConfig, _ []string) error {
@@ -11,6 +13,64 @@ func handleVerbose(config *TestConfig, _ []string) error {
 		fmt.Println("Verbose: enabled")
 	} else {
 		fmt.Println("Verbose: disabled")
+	}
+	return nil
+}
+
+func handleRace(config *TestConfig, _ []string) error {
+	config.ToggleRace()
+	if config.GetRace() {
+		fmt.Println("Race: enabled")
+	} else {
+		fmt.Println("Race: disabled")
+	}
+	return nil
+}
+
+func handleFailFast(config *TestConfig, _ []string) error {
+	config.ToggleFailFast()
+	if config.GetFailFast() {
+		fmt.Println("FailFast: enabled")
+	} else {
+		fmt.Println("FailFast: disabled")
+	}
+	return nil
+}
+
+func handleCover(config *TestConfig, _ []string) error {
+	config.ToggleCover()
+	if config.GetCover() {
+		fmt.Println("Cover: enabled")
+	} else {
+		fmt.Println("Cover: disabled")
+	}
+	return nil
+}
+
+func handleCount(config *TestConfig, args []string) error {
+	if len(args) == 0 {
+		config.SetCount(0)
+		fmt.Println("Count: cleared")
+		return nil
+	}
+
+	countStr := args[0]
+	count, err := strconv.Atoi(countStr)
+	if err != nil {
+		fmt.Printf("Error: invalid count value %q (must be a non-negative integer)\n", countStr)
+		return nil // Don't return error to avoid breaking the flow
+	}
+
+	if count < 0 {
+		fmt.Printf("Error: count value must be non-negative (got %d)\n", count)
+		return nil
+	}
+
+	config.SetCount(count)
+	if count == 0 {
+		fmt.Println("Count: cleared")
+	} else {
+		fmt.Printf("Count: %d\n", count)
 	}
 	return nil
 }
@@ -29,7 +89,7 @@ func handleRunPattern(config *TestConfig, args []string) error {
 	}
 	pattern := args[0]
 	config.SetRunPattern(pattern)
-	fmt.Printf("Run pattern: %s\n", pattern)
+	fmt.Println("Run pattern:", pattern)
 	return nil
 }
 
@@ -41,7 +101,7 @@ func handleSkipPattern(config *TestConfig, args []string) error {
 	}
 	pattern := args[0]
 	config.SetSkipPattern(pattern)
-	fmt.Printf("Skip pattern: %s\n", pattern)
+	fmt.Println("Skip pattern:", pattern)
 	return nil
 }
 
@@ -64,27 +124,47 @@ func handleTestPath(config *TestConfig, args []string) error {
 	return nil
 }
 
-func handleCls(_ *TestConfig, _ []string) error {
-	fmt.Print("\x1b[H\x1b[2J")
+func handleCls(config *TestConfig, _ []string) error {
+	config.ToggleClearScreen()
+	if config.GetClearScreen() {
+		fmt.Println("Clear screen before each run: enabled")
+	} else {
+		fmt.Println("Clear screen before each run: disabled")
+	}
 	return nil
 }
 
-func handleRun(_ *TestConfig, _ []string) error {
-	// This handler is no longer used - the force run command is handled
-	// directly in main.go because it needs access to channels
-	// Keeping this for backwards compatibility with tests
+func handleForceRun(_ *TestConfig, _ []string) error {
+	return nil
+}
+
+func handleCommandBase(config *TestConfig, args []string) error {
+	var cmdBase []string
+	if len(args) == 0 {
+		cmdBase = []string{"go", "test"}
+	} else {
+		cmdBase = args
+	}
+	config.SetCommandBase(cmdBase)
+	fmt.Println("Test command:", strings.Join(cmdBase, " "))
 	return nil
 }
 
 func handleHelp(_ *TestConfig, _ []string) error {
 	fmt.Println("Available commands:")
 	fmt.Println("  v            Toggle verbose mode (-v flag)")
+	fmt.Println("  race         Toggle race mode (-race flag)")
+	fmt.Println("  ff           Toggle failfast mode (-failfast flag)")
+	fmt.Println("  cover        Toggle cover mode (-cover flag)")
+	fmt.Println("  count <n>    Set test count (-count=<n>, n > 0)")
+	fmt.Println("  count        Clear count")
 	fmt.Println("  r <pattern>  Set test run pattern (-run=<pattern>)")
 	fmt.Println("  r            Clear run pattern")
 	fmt.Println("  s <pattern>  Set test skip pattern (-skip=<pattern>)")
 	fmt.Println("  s            Clear skip pattern")
 	fmt.Println("  p <path>     Set test path (default: ./...")
 	fmt.Println("  p            Set test path to default (./...)")
+	fmt.Println("  cmd          Set the base command to run (default: go test)")
 	fmt.Println("  clear        Clear all parameters")
 	fmt.Println("  cls          Clear screen")
 	fmt.Println("  f            Force test run")

@@ -37,11 +37,7 @@ func main() {
 	ctx, _ := internal.SetupSignalHandler()
 
 	// Create test config for command handlers
-	config := &internal.TestConfig{
-		TestPath:   "./...",
-		Verbose:    false,
-		RunPattern: "",
-	}
+	config := internal.NewTestConfig()
 
 	// Store config in context
 	ctx = internal.WithConfig(ctx, config)

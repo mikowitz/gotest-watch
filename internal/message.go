@@ -12,14 +12,19 @@ const (
 type Command string
 
 const (
-	VerboseCmd     Command = "v"
-	SetPathCmd     Command = "p"
-	SetPatternCmd  Command = "r"
-	SetSkipCmd     Command = "s"
-	HelpCmd        Command = "h"
-	ClearCmd       Command = "clear"
-	ClearScreenCmd Command = "cls"
-	ForceRunCmd    Command = "f"
+	VerboseCmd        Command = "v"
+	SetPathCmd        Command = "p"
+	SetPatternCmd     Command = "r"
+	SetSkipCmd        Command = "s"
+	HelpCmd           Command = "h"
+	ClearCmd          Command = "clear"
+	ClearScreenCmd    Command = "cls"
+	ForceRunCmd       Command = "f"
+	RaceCmd           Command = "race"
+	FailFastCmd       Command = "ff"
+	CountCmd          Command = "count"
+	SetCommandBaseCmd Command = "cmd"
+	CoverCmd          Command = "cover"
 )
 
 type Message interface {
