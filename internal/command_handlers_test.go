@@ -1101,3 +1101,74 @@ func TestHandleCount_WorksViaRegistry(t *testing.T) {
 	assert.Equal(t, 7, config.GetCount())
 	assert.Equal(t, "Count: 7\n", output)
 }
+
+// ============================================================================
+// Cover Toggle Tests
+// ============================================================================
+
+func TestHandleCover_TogglesFromFalseToTrue(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Cover:      false,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCover(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.True(t, config.GetCover(), "Cover should be toggled to true")
+	assert.Equal(t, "Cover: enabled\n", output, "Should print enabled message")
+}
+
+func TestHandleCover_TogglesFromTrueToFalse(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Cover:      true,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleCover(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.False(t, config.GetCover(), "Cover should be toggled to false")
+	assert.Equal(t, "Cover: disabled\n", output, "Should print disabled message")
+}
+
+func TestHandleCover_TogglesMultipleTimes(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Cover:      false,
+		RunPattern: "",
+	}
+
+	// Toggle on
+	err := handleCover(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetCover())
+
+	// Toggle off
+	err = handleCover(config, []string{})
+	require.NoError(t, err)
+	assert.False(t, config.GetCover())
+
+	// Toggle on again
+	err = handleCover(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetCover())
+}
+
+func TestHandleCover_IgnoresArguments(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Cover:      false,
+		RunPattern: "",
+	}
+
+	err := handleCover(config, []string{"arg1", "arg2"})
+	require.NoError(t, err)
+	assert.True(t, config.GetCover(), "Should toggle regardless of arguments")
+}

@@ -17,6 +17,7 @@ type TestConfig struct {
 	FailFast    bool
 	Count       int
 	ClearScreen bool
+	Cover       bool
 	WorkingDir  string // Optional: if set, tests will run in this directory
 }
 
@@ -43,6 +44,9 @@ func (tc *TestConfig) BuildCommand() string {
 	}
 	if tc.FailFast {
 		b.WriteString(" -failfast")
+	}
+	if tc.Cover {
+		b.WriteString(" -cover")
 	}
 	if tc.Count > 0 {
 		b.WriteString(" -count=")
@@ -113,6 +117,12 @@ func (tc *TestConfig) GetCount() int {
 	return tc.Count
 }
 
+func (tc *TestConfig) GetCover() bool {
+	tc.RLock()
+	defer tc.RUnlock()
+	return tc.Cover
+}
+
 // Safe setters
 func (tc *TestConfig) SetVerbose(v bool) {
 	tc.Lock()
@@ -174,6 +184,12 @@ func (tc *TestConfig) ToggleFailFast() {
 	tc.FailFast = !tc.FailFast
 }
 
+func (tc *TestConfig) ToggleCover() {
+	tc.Lock()
+	defer tc.Unlock()
+	tc.Cover = !tc.Cover
+}
+
 func (tc *TestConfig) Clear() {
 	tc.Lock()
 	defer tc.Unlock()
@@ -185,4 +201,5 @@ func (tc *TestConfig) Clear() {
 	tc.Race = false
 	tc.FailFast = false
 	tc.Count = 0
+	tc.Cover = false
 }

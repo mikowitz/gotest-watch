@@ -37,6 +37,16 @@ func handleFailFast(config *TestConfig, _ []string) error {
 	return nil
 }
 
+func handleCover(config *TestConfig, _ []string) error {
+	config.ToggleCover()
+	if config.GetCover() {
+		fmt.Println("Cover: enabled")
+	} else {
+		fmt.Println("Cover: disabled")
+	}
+	return nil
+}
+
 func handleCount(config *TestConfig, args []string) error {
 	if len(args) == 0 {
 		config.SetCount(0)
@@ -145,6 +155,7 @@ func handleHelp(_ *TestConfig, _ []string) error {
 	fmt.Println("  v            Toggle verbose mode (-v flag)")
 	fmt.Println("  race         Toggle race mode (-race flag)")
 	fmt.Println("  ff           Toggle failfast mode (-failfast flag)")
+	fmt.Println("  cover        Toggle cover mode (-cover flag)")
 	fmt.Println("  count <n>    Set test count (-count=<n>, n > 0)")
 	fmt.Println("  count        Clear count")
 	fmt.Println("  r <pattern>  Set test run pattern (-run=<pattern>)")

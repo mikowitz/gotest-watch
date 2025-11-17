@@ -44,3 +44,65 @@ func TestBuildCommand(t *testing.T) {
 		})
 	}
 }
+
+func TestBuildCommand_WithCover(t *testing.T) {
+	tests := []struct {
+		name        string
+		cover       bool
+		expectedCmd string
+	}{
+		{"cover disabled", false, "go test ./..."},
+		{"cover enabled", true, "go test ./... -cover"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			config := TestConfig{
+				TestPath:    "./...",
+				CommandBase: []string{"go", "test"},
+				Cover:       tc.cover,
+			}
+
+			cmd := config.BuildCommand()
+
+			assert.Equal(t, tc.expectedCmd, cmd)
+		})
+	}
+}
+
+func TestBuildCommand_CoverWithOtherFlags(t *testing.T) {
+	config := TestConfig{
+		TestPath:    "./...",
+		CommandBase: []string{"go", "test"},
+		Verbose:     true,
+		Cover:       true,
+		Race:        true,
+	}
+
+	cmd := config.BuildCommand()
+
+	assert.Equal(t, "go test ./... -v -race -cover", cmd)
+}
+
+func TestGetCover(t *testing.T) {
+	config := &TestConfig{
+		Cover: true,
+	}
+
+	assert.True(t, config.GetCover())
+
+	config.Cover = false
+	assert.False(t, config.GetCover())
+}
+
+func TestToggleCover(t *testing.T) {
+	config := &TestConfig{
+		Cover: false,
+	}
+
+	config.ToggleCover()
+	assert.True(t, config.GetCover(), "Cover should toggle from false to true")
+
+	config.ToggleCover()
+	assert.False(t, config.GetCover(), "Cover should toggle from true to false")
+}

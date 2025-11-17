@@ -24,6 +24,7 @@ const (
 	FailFastCmd       Command = "ff"
 	CountCmd          Command = "count"
 	SetCommandBaseCmd Command = "cmd"
+	CoverCmd          Command = "cover"
 )
 
 type Message interface {
