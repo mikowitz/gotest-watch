@@ -12,7 +12,15 @@ import (
 	"sync"
 )
 
-func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup) {
+const (
+	Red     = "31;1"
+	Green   = "32;1"
+	Yellow  = "33;1"
+	Magenta = "35;1"
+	White   = "37;1"
+)
+
+func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup, colorize bool) {
 	defer wg.Done()
 
 	for r.Scan() {
@@ -21,7 +29,12 @@ func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup) {
 			log.Println(err)
 			return
 		}
-		_, err = w.Write([]byte(r.Text()))
+
+		output := r.Text()
+		if colorize {
+			output = colorizeOutput(output)
+		}
+		_, err = w.Write([]byte(output))
 		if err != nil {
 			log.Println(err)
 		}
@@ -59,7 +72,7 @@ func RunTests(
 	testCommand := config.BuildCommand()
 	fields := strings.Fields(testCommand)
 
-	displayCommand(fields[1:])
+	displayCommand(fields)
 
 	// Use CommandContext to support cancellation via context
 	//nolint:gosec // TODO: sanitize input
@@ -69,6 +82,8 @@ func RunTests(
 	if config.WorkingDir != "" {
 		cmd.Dir = config.WorkingDir
 	}
+
+	colorize := config.GetColor()
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -93,12 +108,12 @@ func RunTests(
 
 	go func() {
 		r := bufio.NewScanner(stdout)
-		streamOutput(r, stdoutWriter, &wg)
+		streamOutput(r, stdoutWriter, &wg, colorize)
 	}()
 
 	go func() {
 		r := bufio.NewScanner(stderr)
-		streamOutput(r, stderrWriter, &wg)
+		streamOutput(r, stderrWriter, &wg, colorize)
 	}()
 
 	wg.Wait()
@@ -108,4 +123,26 @@ func RunTests(
 	}
 
 	completeChan <- TestCompleteMessage{}
+}
+
+func selectColorizer(line string) string {
+	if strings.HasPrefix(line, "?") || strings.Contains(line, "SKIP") { // || strings.HasPrefix(line, "=== RUN") {
+		return Yellow
+	}
+	if strings.HasPrefix(line, "ok") || strings.Contains(line, "PASS") {
+		return Green
+	}
+	if strings.HasPrefix(line, "FAIL") {
+		return Red
+	}
+	if strings.Contains(line, ".go:") {
+		return Magenta
+	}
+	return White
+}
+
+func colorizeOutput(output string) string {
+	reset := "\033[0m"
+	colorizer := selectColorizer(output)
+	return fmt.Sprintf("\033[%sm%s%s", colorizer, output, reset)
 }

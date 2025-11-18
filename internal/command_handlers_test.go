@@ -1172,3 +1172,74 @@ func TestHandleCover_IgnoresArguments(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, config.GetCover(), "Should toggle regardless of arguments")
 }
+
+// ============================================================================
+// Color Toggle Tests
+// ============================================================================
+
+func TestHandleColor_TogglesFromFalseToTrue(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Color:      false,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleColor(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.True(t, config.GetColor(), "Color should be toggled to true")
+	assert.Equal(t, "Color: enabled\n", output, "Should print enabled message")
+}
+
+func TestHandleColor_TogglesFromTrueToFalse(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Color:      true,
+		RunPattern: "",
+	}
+
+	output := captureStdout(t, func() {
+		err := handleColor(config, []string{})
+		require.NoError(t, err)
+	})
+
+	assert.False(t, config.GetColor(), "Color should be toggled to false")
+	assert.Equal(t, "Color: disabled\n", output, "Should print disabled message")
+}
+
+func TestHandleColor_TogglesMultipleTimes(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Color:      false,
+		RunPattern: "",
+	}
+
+	// Toggle on
+	err := handleColor(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetColor())
+
+	// Toggle off
+	err = handleColor(config, []string{})
+	require.NoError(t, err)
+	assert.False(t, config.GetColor())
+
+	// Toggle on again
+	err = handleColor(config, []string{})
+	require.NoError(t, err)
+	assert.True(t, config.GetColor())
+}
+
+func TestHandleColor_IgnoresArguments(t *testing.T) {
+	config := &TestConfig{
+		TestPath:   "./...",
+		Color:      false,
+		RunPattern: "",
+	}
+
+	err := handleColor(config, []string{"arg1", "arg2"})
+	require.NoError(t, err)
+	assert.True(t, config.GetColor(), "Should toggle regardless of arguments")
+}

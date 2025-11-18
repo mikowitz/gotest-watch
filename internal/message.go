@@ -25,6 +25,7 @@ const (
 	CountCmd          Command = "count"
 	SetCommandBaseCmd Command = "cmd"
 	CoverCmd          Command = "cover"
+	ColorCmd          Command = "color"
 )
 
 type Message interface {

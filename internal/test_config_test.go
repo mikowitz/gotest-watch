@@ -106,3 +106,39 @@ func TestToggleCover(t *testing.T) {
 	config.ToggleCover()
 	assert.False(t, config.GetCover(), "Cover should toggle from true to false")
 }
+
+func TestGetColor(t *testing.T) {
+	config := &TestConfig{
+		Color: true,
+	}
+
+	assert.True(t, config.GetColor())
+
+	config.Color = false
+	assert.False(t, config.GetColor())
+}
+
+func TestToggleColor(t *testing.T) {
+	config := &TestConfig{
+		Color: false,
+	}
+
+	config.ToggleColor()
+	assert.True(t, config.GetColor(), "Color should toggle from false to true")
+
+	config.ToggleColor()
+	assert.False(t, config.GetColor(), "Color should toggle from true to false")
+}
+
+func TestBuildCommand_DoesNotIncludeColor(t *testing.T) {
+	config := TestConfig{
+		TestPath:    "./...",
+		CommandBase: []string{"go", "test"},
+		Color:       true,
+	}
+
+	cmd := config.BuildCommand()
+
+	assert.Equal(t, "go test ./...", cmd, "Color should not affect command output")
+	assert.NotContains(t, cmd, "color", "Command should not contain color flag")
+}
