@@ -12,6 +12,14 @@ import (
 	"sync"
 )
 
+const (
+	Red     = "31;1"
+	Green   = "32;1"
+	Yellow  = "33;1"
+	Magenta = "35;1"
+	White   = "37;1"
+)
+
 func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup, colorize bool) {
 	defer wg.Done()
 
@@ -24,18 +32,7 @@ func streamOutput(r *bufio.Scanner, w io.Writer, wg *sync.WaitGroup, colorize bo
 
 		output := r.Text()
 		if colorize {
-			var colorizer string
-			reset := "\033[0m"
-			if strings.HasPrefix(output, "?") || strings.Contains(output, "SKIP") || strings.HasPrefix(output, "=== RUN") {
-				colorizer = "\033[33;1m"
-			}
-			if strings.HasPrefix(output, "ok") || strings.Contains(output, "PASS") {
-				colorizer = "\033[32;1m"
-			}
-			if strings.HasPrefix(output, "FAIL") {
-				colorizer = "\033[31;1m"
-			}
-			output = fmt.Sprintf("%s%s%s", colorizer, output, reset)
+			output = colorizeOutput(output)
 		}
 		_, err = w.Write([]byte(output))
 		if err != nil {
@@ -126,4 +123,26 @@ func RunTests(
 	}
 
 	completeChan <- TestCompleteMessage{}
+}
+
+func selectColorizer(line string) string {
+	if strings.HasPrefix(line, "?") || strings.Contains(line, "SKIP") { // || strings.HasPrefix(line, "=== RUN") {
+		return Yellow
+	}
+	if strings.HasPrefix(line, "ok") || strings.Contains(line, "PASS") {
+		return Green
+	}
+	if strings.HasPrefix(line, "FAIL") {
+		return Red
+	}
+	if strings.Contains(line, ".go:") {
+		return Magenta
+	}
+	return White
+}
+
+func colorizeOutput(output string) string {
+	reset := "\033[0m"
+	colorizer := selectColorizer(output)
+	return fmt.Sprintf("\033[%sm%s%s", colorizer, output, reset)
 }
