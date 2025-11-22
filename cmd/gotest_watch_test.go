@@ -13,14 +13,7 @@ func createTestCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "gotest-watch",
 	}
-	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose test output")
-	cmd.Flags().StringVarP(&runPattern, "run", "r", "", "run tests that match this pattern")
-	cmd.Flags().StringVarP(&skipPattern, "skip", "s", "", "skip tests that match this pattern")
-	cmd.Flags().IntVarP(&count, "count", "n", 0, "number of times to run each test")
-	cmd.Flags().BoolVarP(&clearScreen, "cls", "l", false, "clear the screen before each test run")
-	cmd.Flags().BoolVarP(&color, "color", "c", false, "ANSI color output")
-	cmd.Flags().StringVarP(&commandBase, "cmd", "m", "go test", "base command to run")
-	cmd.Flags().StringVarP(&testPath, "path", "p", "./...", "directory to run tests in")
+	setCmdFlags(cmd)
 	return cmd
 }
 
