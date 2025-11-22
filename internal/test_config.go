@@ -8,18 +8,18 @@ import (
 
 type TestConfig struct {
 	sync.RWMutex
-	TestPath    string
-	Verbose     bool
-	RunPattern  string
-	SkipPattern string
-	CommandBase []string
-	Race        bool
-	FailFast    bool
-	Count       int
-	ClearScreen bool
-	Cover       bool
-	Color       bool
-	WorkingDir  string // Optional: if set, tests will run in this directory
+	TestPath    string   `yaml:"testPath"`
+	Verbose     bool     `yaml:"verbose"`
+	RunPattern  string   `yaml:"runPattern"`
+	SkipPattern string   `yaml:"skipPattern"`
+	CommandBase []string `yaml:"commandBase"`
+	Race        bool     `yaml:"race"`
+	FailFast    bool     `yaml:"failfast"`
+	Count       int      `yaml:"count"`
+	ClearScreen bool     `yaml:"clearScreen"`
+	Cover       bool     `yaml:"cover"`
+	Color       bool     `yaml:"color"`
+	WorkingDir  string   `yaml:"workingDir"` // Optional: if set, tests will run in this directory
 }
 
 func NewTestConfig() *TestConfig {

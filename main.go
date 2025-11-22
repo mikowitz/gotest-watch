@@ -36,8 +36,15 @@ func main() {
 	// Create a cancellable context for graceful shutdown
 	ctx, _ := internal.SetupSignalHandler()
 
-	// Create test config for command handlers
-	config := internal.NewTestConfig()
+	// Get working directory for config lookup
+	root, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+		root = "."
+	}
+
+	// Create test config from file or defaults
+	config := internal.LoadOrDefaultConfig(root)
 
 	// Store config in context
 	ctx = internal.WithConfig(ctx, config)
@@ -51,11 +58,6 @@ func main() {
 	testCompleteChan := make(chan internal.TestCompleteMessage, 10)
 
 	// Start file watcher in background
-	root, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
-	}
-
 	startWatching := make(chan struct{})
 
 	go internal.WatchFiles(ctx, root, fileChangeChan, startWatching)

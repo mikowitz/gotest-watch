@@ -1,0 +1,17 @@
+---
+# Configures the test command
+commandBase:
+- go
+- test
+testPath: ./...
+verbose: true
+runPattern: ""
+skipPattern: ""
+race: false
+cover: false
+failfast: false
+count: 0
+# Configures gotest-watch
+clearScreen: false
+color: true
+workingDir: ""

@@ -73,6 +73,7 @@ linters:
             - $gostd
             - github.com/fsnotify/fsnotify
             - github.com/mikowitz/gotest-watch/internal
+            - gopkg.in/yaml.v3
         test:
           files:
             - "$test"
