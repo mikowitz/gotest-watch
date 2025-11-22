@@ -167,6 +167,18 @@ func (tc *TestConfig) SetCount(count int) {
 	tc.Count = count
 }
 
+func (tc *TestConfig) SetClearScreen(cls bool) {
+	tc.Lock()
+	defer tc.Unlock()
+	tc.ClearScreen = cls
+}
+
+func (tc *TestConfig) SetColor(color bool) {
+	tc.Lock()
+	defer tc.Unlock()
+	tc.Color = color
+}
+
 func (tc *TestConfig) ToggleVerbose() {
 	tc.Lock()
 	defer tc.Unlock()
