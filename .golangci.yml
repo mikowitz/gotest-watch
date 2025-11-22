@@ -73,14 +73,18 @@ linters:
             - $gostd
             - github.com/fsnotify/fsnotify
             - github.com/mikowitz/gotest-watch/internal
+            - github.com/mikowitz/gotest-watch/cmd
             - gopkg.in/yaml.v3
+            - github.com/spf13/cobra
         test:
           files:
             - "$test"
           allow:
             - $gostd
             - github.com/fsnotify/fsnotify
+            - github.com/mikowitz/gotest-watch/internal
             - github.com/stretchr/testify
+            - github.com/spf13/cobra
 
 # issues:
 #   exclude-use-default: false

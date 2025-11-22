@@ -37,7 +37,7 @@ func TestOverrideConfig(t *testing.T) {
 		config.SetTestPath("./pkg/...")
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{}) // No flags set
+		_ = cmd.ParseFlags([]string{}) // No flags set
 
 		overrideConfig(config, cmd)
 
@@ -64,7 +64,7 @@ func TestOverrideConfig(t *testing.T) {
 		config.SetTestPath("./pkg/...")
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--run=TestNew", "--count=10"}) // Only set run and count
+		_ = cmd.ParseFlags([]string{"--run=TestNew", "--count=10"}) // Only set run and count
 
 		overrideConfig(config, cmd)
 
@@ -88,7 +88,7 @@ func TestOverrideConfig(t *testing.T) {
 		config.Color = true
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--verbose=false"}) // Explicitly set to false
+		_ = cmd.ParseFlags([]string{"--verbose=false"}) // Explicitly set to false
 
 		overrideConfig(config, cmd)
 
@@ -105,7 +105,7 @@ func TestOverrideConfig(t *testing.T) {
 		config.SetSkipPattern("TestBar")
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--run="}) // Explicitly set to empty
+		_ = cmd.ParseFlags([]string{"--run="}) // Explicitly set to empty
 
 		overrideConfig(config, cmd)
 
@@ -127,7 +127,7 @@ func TestOverrideConfig(t *testing.T) {
 		config.SetTestPath("./pkg/...")
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{
+		_ = cmd.ParseFlags([]string{
 			"--verbose=false",
 			"--run=TestCLI",
 			"--skip=TestSkipCLI",
@@ -158,7 +158,7 @@ func TestVerboseFlag(t *testing.T) {
 		config.SetVerbose(false)
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{})
+		_ = cmd.ParseFlags([]string{})
 
 		overrideConfig(config, cmd)
 
@@ -170,7 +170,7 @@ func TestVerboseFlag(t *testing.T) {
 		config.SetVerbose(true)
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{})
+		_ = cmd.ParseFlags([]string{})
 
 		overrideConfig(config, cmd)
 
@@ -182,7 +182,7 @@ func TestVerboseFlag(t *testing.T) {
 		config.SetVerbose(false)
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"-v"})
+		_ = cmd.ParseFlags([]string{"-v"})
 
 		overrideConfig(config, cmd)
 
@@ -194,7 +194,7 @@ func TestVerboseFlag(t *testing.T) {
 		config.SetVerbose(false)
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--verbose"})
+		_ = cmd.ParseFlags([]string{"--verbose"})
 
 		overrideConfig(config, cmd)
 
@@ -206,7 +206,7 @@ func TestVerboseFlag(t *testing.T) {
 		config.SetVerbose(true)
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--verbose=false"})
+		_ = cmd.ParseFlags([]string{"--verbose=false"})
 
 		overrideConfig(config, cmd)
 
@@ -220,7 +220,7 @@ func TestRunPatternFlag(t *testing.T) {
 		config.SetRunPattern("TestFoo")
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{})
+		_ = cmd.ParseFlags([]string{})
 
 		overrideConfig(config, cmd)
 
@@ -232,7 +232,7 @@ func TestRunPatternFlag(t *testing.T) {
 		config.SetRunPattern("TestFoo")
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--run=TestBar"})
+		_ = cmd.ParseFlags([]string{"--run=TestBar"})
 
 		overrideConfig(config, cmd)
 
@@ -244,7 +244,7 @@ func TestRunPatternFlag(t *testing.T) {
 		config.SetRunPattern("TestFoo")
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"-r", "TestBar"})
+		_ = cmd.ParseFlags([]string{"-r", "TestBar"})
 
 		overrideConfig(config, cmd)
 
@@ -258,7 +258,7 @@ func TestSkipPatternFlag(t *testing.T) {
 		config.SetSkipPattern("TestFoo")
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{})
+		_ = cmd.ParseFlags([]string{})
 
 		overrideConfig(config, cmd)
 
@@ -270,7 +270,7 @@ func TestSkipPatternFlag(t *testing.T) {
 		config.SetSkipPattern("TestFoo")
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--skip=TestBar"})
+		_ = cmd.ParseFlags([]string{"--skip=TestBar"})
 
 		overrideConfig(config, cmd)
 
@@ -284,7 +284,7 @@ func TestCountFlag(t *testing.T) {
 		config.SetCount(5)
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{})
+		_ = cmd.ParseFlags([]string{})
 
 		overrideConfig(config, cmd)
 
@@ -296,7 +296,7 @@ func TestCountFlag(t *testing.T) {
 		config.SetCount(5)
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--count=10"})
+		_ = cmd.ParseFlags([]string{"--count=10"})
 
 		overrideConfig(config, cmd)
 
@@ -308,7 +308,7 @@ func TestCountFlag(t *testing.T) {
 		config.SetCount(5)
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"-n", "10"})
+		_ = cmd.ParseFlags([]string{"-n", "10"})
 
 		overrideConfig(config, cmd)
 
@@ -322,7 +322,7 @@ func TestClearScreenFlag(t *testing.T) {
 		config.ClearScreen = true
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{})
+		_ = cmd.ParseFlags([]string{})
 
 		overrideConfig(config, cmd)
 
@@ -334,7 +334,7 @@ func TestClearScreenFlag(t *testing.T) {
 		config.ClearScreen = false
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--cls"})
+		_ = cmd.ParseFlags([]string{"--cls"})
 
 		overrideConfig(config, cmd)
 
@@ -346,7 +346,7 @@ func TestClearScreenFlag(t *testing.T) {
 		config.ClearScreen = true
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--cls=false"})
+		_ = cmd.ParseFlags([]string{"--cls=false"})
 
 		overrideConfig(config, cmd)
 
@@ -360,7 +360,7 @@ func TestColorFlag(t *testing.T) {
 		config.Color = true
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{})
+		_ = cmd.ParseFlags([]string{})
 
 		overrideConfig(config, cmd)
 
@@ -372,7 +372,7 @@ func TestColorFlag(t *testing.T) {
 		config.Color = false
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--color"})
+		_ = cmd.ParseFlags([]string{"--color"})
 
 		overrideConfig(config, cmd)
 
@@ -386,7 +386,7 @@ func TestCommandBaseFlag(t *testing.T) {
 		config.SetCommandBase([]string{"richgo", "test"})
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{})
+		_ = cmd.ParseFlags([]string{})
 
 		overrideConfig(config, cmd)
 
@@ -398,7 +398,7 @@ func TestCommandBaseFlag(t *testing.T) {
 		config.SetCommandBase([]string{"richgo", "test"})
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--cmd=go test -tags integration"})
+		_ = cmd.ParseFlags([]string{"--cmd=go test -tags integration"})
 
 		overrideConfig(config, cmd)
 
@@ -412,7 +412,7 @@ func TestTestPathFlag(t *testing.T) {
 		config.SetTestPath("./pkg/...")
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{})
+		_ = cmd.ParseFlags([]string{})
 
 		overrideConfig(config, cmd)
 
@@ -424,7 +424,7 @@ func TestTestPathFlag(t *testing.T) {
 		config.SetTestPath("./pkg/...")
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"--path=./cli/..."})
+		_ = cmd.ParseFlags([]string{"--path=./cli/..."})
 
 		overrideConfig(config, cmd)
 
@@ -436,7 +436,7 @@ func TestTestPathFlag(t *testing.T) {
 		config.SetTestPath("./pkg/...")
 
 		cmd := createTestCommand()
-		cmd.ParseFlags([]string{"-p", "./cli/..."})
+		_ = cmd.ParseFlags([]string{"-p", "./cli/..."})
 
 		overrideConfig(config, cmd)
 

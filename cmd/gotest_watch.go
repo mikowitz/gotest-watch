@@ -25,25 +25,34 @@ var (
 	color       bool
 )
 
-var gotestWatchCmd = &cobra.Command{
-	Use:   "gotest-watch",
-	Short: "An interactive command line tool for running `go test`",
-	Long:  "An interactive command line tool for running `go test`. It watches *.go files in your project for changes, and can be customized between runs to specify many of the flags that can be set for `go test`.",
-	Args:  cobra.NoArgs,
-	Run:   gotestWatch,
+func setCmdFlags(cmd *cobra.Command) {
+	cmd.Flags().StringVarP(&commandBase, "cmd", "m", "go test", "base command to run (e.g. `go test`)")
+	cmd.Flags().StringVarP(&testPath, "path", "p", "./...", "directory to run tests in")
+	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose test output")
+	cmd.Flags().StringVarP(&runPattern, "run", "r", "", "run tests that match this pattern")
+	cmd.Flags().StringVarP(&skipPattern, "skip", "s", "", "skip tests that match this pattern")
+	cmd.Flags().IntVarP(&count, "count", "n", 0, "number of times to run each test")
+	cmd.Flags().BoolVarP(&clearScreen, "cls", "l", false, "clear the screen before each test run")
+	cmd.Flags().BoolVarP(&color, "color", "c", false, "ANSI color output")
 }
+
+var gotestWatchCmd = func() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "gotest-watch",
+		Short: "An interactive command line tool for running 'go test'",
+		Long: `An interactive command line tool for running 'go test'.
+It watches *.go files in your project for changes, and can be customized
+between runs to specify many of the flags that can be set for 'go test'`,
+		Args: cobra.NoArgs,
+		Run:  gotestWatch,
+	}
+
+	setCmdFlags(cmd)
+	return cmd
+}()
 
 func gotestWatch(cmd *cobra.Command, args []string) {
 	internal.InitRegistry()
-
-	fmt.Println("commandBase", commandBase, cmd.Flags().Lookup("cmd").Changed)
-	fmt.Println("testPath", testPath, cmd.Flags().Lookup("verbose").Changed)
-	fmt.Println("verbose", verbose)
-	fmt.Println("runPattern", runPattern)
-	fmt.Println("skipPattern", skipPattern)
-	fmt.Println("count", count)
-	fmt.Println("clearScreen", clearScreen)
-	fmt.Println("color", color)
 
 	// Create a cancellable context for graceful shutdown
 	ctx, _ := internal.SetupSignalHandler()
@@ -119,17 +128,6 @@ func Execute() {
 
 func Run() {
 	Execute()
-}
-
-func init() {
-	gotestWatchCmd.Flags().StringVarP(&commandBase, "cmd", "m", "go test", "base command to run (e.g. `go test`)")
-	gotestWatchCmd.Flags().StringVarP(&testPath, "path", "p", "./...", "directory to run tests in")
-	gotestWatchCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose test output")
-	gotestWatchCmd.Flags().StringVarP(&runPattern, "run", "r", "", "run tests that match this pattern")
-	gotestWatchCmd.Flags().StringVarP(&skipPattern, "skip", "s", "", "skip tests that match this pattern")
-	gotestWatchCmd.Flags().IntVarP(&count, "count", "n", 0, "number of times to run each test")
-	gotestWatchCmd.Flags().BoolVarP(&clearScreen, "cls", "l", false, "clear the screen before each test run")
-	gotestWatchCmd.Flags().BoolVarP(&color, "color", "c", false, "ANSI color output")
 }
 
 func overrideConfig(config *internal.TestConfig, cmd *cobra.Command) {
