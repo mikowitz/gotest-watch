@@ -14,4 +14,3 @@ count: 0
 # Configures gotest-watch
 clearScreen: false
 color: true
-workingDir: ""
